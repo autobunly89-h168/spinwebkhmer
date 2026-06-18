@@ -1,0 +1,6 @@
+{
+  "name": "Khmer Spin Wheel Generator",
+  "description": "Interactive lucky spin wheel and giveaway manager with custom poster drawing exports as image and PDF assets.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
