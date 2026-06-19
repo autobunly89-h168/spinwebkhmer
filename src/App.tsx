@@ -8,6 +8,7 @@ import { Participant, Prize, Winner, AppSettings } from './types';
 import SpinWheel from './components/SpinWheel';
 import WinnersPanel from './components/WinnersPanel';
 import PosterGenerator from './components/PosterGenerator';
+import AdSpaceManager, { AdSetting, StickyAdRail } from './components/AdSpace';
 import { LanguageCode, LANGUAGES, translations } from './utils/translations';
 import { 
   Users, 
@@ -97,6 +98,81 @@ export default function App() {
     themeColor: '#EAB308',
     removeWinnersAfterSpin: true,
   });
+
+  // State 7: Monetization Ads States
+  const [leftAd, setLeftAd] = useState<AdSetting>(() => {
+    try {
+      const cached = localStorage.getItem('lucky_draw_left_ad');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed.bannerUrl?.includes('unsplash') || !parsed.scriptCode?.includes('1852067542433053')) {
+          // Upgrade placeholder to user's real AdSense script
+        } else {
+          return parsed;
+        }
+      }
+    } catch (e) {}
+    return {
+      enabled: true,
+      type: 'script',
+      bannerUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=300&auto=format&fit=crop',
+      linkUrl: 'https://spinwebkhmer.vercel.app',
+      scriptCode: `<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-1852067542433053"
+     data-ad-slot="3494965406"
+     data-ad-format="auto"
+     data-full-width-responsive="true"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>`,
+      title: 'Google AdSense: Left Sidebar'
+    };
+  });
+
+  const [rightAd, setRightAd] = useState<AdSetting>(() => {
+    try {
+      const cached = localStorage.getItem('lucky_draw_right_ad');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed.bannerUrl?.includes('unsplash') || !parsed.scriptCode?.includes('1852067542433053')) {
+          // Upgrade placeholder to user's real AdSense script
+        } else {
+          return parsed;
+        }
+      }
+    } catch (e) {}
+    return {
+      enabled: true,
+      type: 'script',
+      bannerUrl: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=300&auto=format&fit=crop',
+      linkUrl: 'https://spinwebkhmer.vercel.app',
+      scriptCode: `<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-1852067542433053"
+     data-ad-slot="3494965406"
+     data-ad-format="auto"
+     data-full-width-responsive="true"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>`,
+      title: 'Google AdSense: Right Sidebar'
+    };
+  });
+
+  const handleUpdateLeftAd = (ad: AdSetting) => {
+    setLeftAd(ad);
+    try {
+      localStorage.setItem('lucky_draw_left_ad', JSON.stringify(ad));
+    } catch (e) {}
+  };
+
+  const handleUpdateRightAd = (ad: AdSetting) => {
+    setRightAd(ad);
+    try {
+      localStorage.setItem('lucky_draw_right_ad', JSON.stringify(ad));
+    } catch (e) {}
+  };
 
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'info' | 'warn' } | null>(null);
 
@@ -437,8 +513,14 @@ export default function App() {
         </div>
       </header>
 
-      {/* MAIN LAYOUT DASHBOARD */}
-      <main className="flex-grow w-full max-w-7xl mx-auto px-4 py-8 space-y-8">
+      {/* MONETIZATION SIDEBAR WORKSPACE: WRAPS MAIN ELEMENT */}
+      <div className="flex-grow w-full max-w-[1550px] mx-auto px-4 py-8 flex flex-col xl:flex-row gap-6 relative items-start">
+        
+        {/* Left Sticky Ad rail */}
+        <StickyAdRail ad={leftAd} side="left" />
+
+        {/* MAIN LAYOUT DASHBOARD */}
+        <main className="flex-1 space-y-8 min-w-0">
         
         {/* TOP INTRO CARD */}
         <div className="bg-[#161618] p-6 rounded-2xl border border-white/5 flex flex-col md:flex-row items-center justify-between gap-6 shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
@@ -467,6 +549,42 @@ export default function App() {
             </button>
           </div>
         </div>
+
+        {/* RESPONSIVE MOBILE AD BANNER: Only displays on screens under xl */}
+        {(leftAd.enabled || rightAd.enabled) && (
+          <div className="xl:hidden bg-[#161618] border border-white/5 p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 shadow-md overflow-hidden">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>
+              <span className="text-xs uppercase font-extrabold text-slate-400 font-sans tracking-wide">Sponsored Ads Khmer</span>
+            </div>
+            
+            {leftAd.enabled ? (
+              <div className="flex-1 w-full flex items-center justify-center">
+                {leftAd.type === 'banner' ? (
+                  <a href={leftAd.linkUrl || '#'} target="_blank" rel="noopener noreferrer" className="text-xs text-orange-450 font-sans font-bold hover:underline flex items-center gap-1">
+                    <span>📢 {leftAd.title || 'Sponsor Ad'}</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                ) : (
+                  <div className="text-[11px] text-emerald-400 font-mono">Google AdSense is active on Left rail</div>
+                )}
+              </div>
+            ) : null}
+
+            {rightAd.enabled ? (
+              <div className="flex-1 w-full flex items-center justify-center border-t sm:border-t-0 sm:border-l border-white/5 sm:pl-4 pt-2 sm:pt-0">
+                {rightAd.type === 'banner' ? (
+                  <a href={rightAd.linkUrl || '#'} target="_blank" rel="noopener noreferrer" className="text-xs text-orange-450 font-sans font-bold hover:underline flex items-center gap-1">
+                    <span>📢 {rightAd.title || 'Sponsor Ad'}</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                ) : (
+                  <div className="text-[11px] text-emerald-400 font-mono">Google AdSense is active on Right rail</div>
+                )}
+              </div>
+            ) : null}
+          </div>
+        )}
 
         {/* ROW 1: SPIN WHEEL (Left) & SETTINGS/PARTICIPANTS (Right) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -704,7 +822,14 @@ export default function App() {
           />
         </div>
 
+
+
       </main>
+
+      {/* Right Sticky Ad rail */}
+      <StickyAdRail ad={rightAd} side="right" />
+
+    </div>
 
       {/* REGIONAL KHMER FOOTER WITH HUMBLE LABELS */}
       <footer className="mt-12 border-t border-white/5 bg-[#0A0A0B] py-8 text-center text-slate-500 text-xs font-sans">
