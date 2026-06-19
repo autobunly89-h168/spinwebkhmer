@@ -82,9 +82,9 @@ export default function App() {
 
   // State 4: Prize names keyed by 1, 2, 3
   const [prizes, setPrizes] = useState<Record<number, Prize>>({
-    1: { id: 'p1', place: 1, type: '1st', title: 'រង្វាន់ទី ១៖ អាវកីឡា FIFA GRADE A' },
-    2: { id: 'p2', place: 2, type: '2nd', title: 'រង្វាន់ទី ២៖ FREE CREDIT $38' },
-    3: { id: 'p3', place: 3, type: '3rd', title: 'រង្វាន់ទី ៣៖ បាល់ទាត់ស៊េរី FIFA' },
+    1: { id: 'p1', place: 1, type: '1st', title: 'រង្វាន់ទី ១៖ សូមបំពេញ' },
+    2: { id: 'p2', place: 2, type: '2nd', title: 'រង្វាន់ទី ២៖ សូមបំពេញ' },
+    3: { id: 'p3', place: 3, type: '3rd', title: 'រង្វាន់ទី ៣៖ សូមបំពេញ' },
   });
 
   // State 5: Active Drawing Target
@@ -92,7 +92,7 @@ export default function App() {
 
   // State 6: General settings
   const [settings, setSettings] = useState<AppSettings>({
-    congratulationsText: 'អបអរសាទរអ្នកឈ្នះក្នុងការទស្សន៍ទាយ Polls ត្រឹមត្រូវ!',
+    congratulationsText: 'អបអរសាទរអ្នកឈ្នះ ត្រឹមត្រូវ!',
     spinDuration: 5,
     themeColor: '#EAB308',
     removeWinnersAfterSpin: true,
@@ -204,7 +204,7 @@ export default function App() {
         if (typeof reader.result === 'string') {
           setLogo(reader.result);
           localStorage.setItem('lucky_draw_logo', reader.result);
-          showNotification('បានបញ្ចូល Logo ក្រុមហ៊ុនជោគជ័យ! (Logo updated)');
+          showNotification('បានបញ្ចូល Logo ជោគជ័យ! (Logo updated)');
         }
       };
       reader.readAsDataURL(file);
