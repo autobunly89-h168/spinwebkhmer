@@ -2007,139 +2007,15 @@ export default function PosterGenerator({
             </div>
           </div>
           
-          {/* LOGO CALIBRATION CONTROLS (Only visible when logo uploaded) */}
-          {logo && (
-            <div className="bg-[#161618] border border-white/5 p-5 rounded-2xl space-y-4 shadow-xl" id="logo-calibration-panel">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Sliders className="w-4 h-4 text-orange-500 animate-pulse" />
-                  <h3 className="text-white text-sm font-sans font-semibold">
-                    ការកំណត់តម្រឹម LOGO (Logo Calibration Panel)
-                  </h3>
-                </div>
-                <button
-                  onClick={() => {
-                    setLogoScale(1.0);
-                    setLogoOffsetX(0);
-                    setLogoOffsetY(0);
-                    setLogoUseOriginalShape(true);
-                  }}
-                  className="text-[10px] text-slate-400 hover:text-orange-500 flex items-center gap-1 cursor-pointer hover:underline transition"
-                  title="លុបការកំណត់ និងតម្រឹមឡើងវិញជាតម្លៃដើម"
-                >
-                  <RotateCcw className="w-3 h-3" />
-                  <span>Reset តម្លៃដើម</span>
-                </button>
-              </div>
+          {/* LOGO CALIBRATION CONTROLS REMOVED - INTEGRATED INTO THE PHOTOSHOP LAYER EDITOR */}
 
-              {/* Keep scale aspect / circle clip */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-[#111112] p-3 rounded-xl border border-white/5 gap-2">
-                <span className="text-xs text-slate-300 font-sans flex items-center gap-1.5">
-                  <Crop className="w-3.5 h-3.5 text-orange-500" />
-                  <span>ទម្រង់គែមរូបភាព Logo៖</span>
-                </span>
-                
-                <div className="flex bg-[#1E1E21] p-0.5 rounded-lg border border-white/5 shrink-0 self-start sm:self-auto">
-                  <button
-                    onClick={() => setLogoUseOriginalShape(true)}
-                    className={`px-3 py-1 rounded-md text-[10px] font-sans transition-all cursor-pointer ${logoUseOriginalShape ? 'bg-orange-600 text-white font-bold' : 'text-slate-400'}`}
-                  >
-                    រក្សាទម្រង់ដើម (Aspect)
-                  </button>
-                  <button
-                    onClick={() => setLogoUseOriginalShape(false)}
-                    className={`px-3 py-1 rounded-md text-[10px] font-sans transition-all cursor-pointer ${!logoUseOriginalShape ? 'bg-orange-600 text-white font-bold' : 'text-slate-400'}`}
-                  >
-                    កាត់ជារង្វង់មូល (Circular)
-                  </button>
-                </div>
-              </div>
-
-              {/* Adjust Scale Slider */}
-              <div className="space-y-4 pt-1">
-                <div className="space-y-1.5">
-                  <div className="flex justify-between text-xs font-sans text-slate-400">
-                    <span>🔍 ទំហំ Logo (Zoom Scale)</span>
-                    <span className="font-mono text-orange-450 font-bold">{Math.round(logoScale * 100)}%</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <button 
-                      onClick={() => setLogoScale(prev => Math.max(0.2, Math.round((prev - 0.1) * 10) / 10))}
-                      className="w-7 h-7 bg-[#1E1E21] hover:bg-[#2A2A2E] text-white rounded-lg text-xs flex items-center justify-center cursor-pointer transition active:scale-90"
-                    >-</button>
-                    <input
-                      type="range"
-                      min="0.2"
-                      max="3.0"
-                      step="0.05"
-                      value={logoScale}
-                      onChange={(e) => setLogoScale(parseFloat(e.target.value))}
-                      className="flex-grow accent-orange-500 cursor-ew-resize h-1 bg-white/10 rounded-lg appearance-none"
-                    />
-                    <button 
-                      onClick={() => setLogoScale(prev => Math.min(3.0, Math.round((prev + 0.1) * 10) / 10))}
-                      className="w-7 h-7 bg-[#1E1E21] hover:bg-[#2A2A2E] text-white rounded-lg text-xs flex items-center justify-center cursor-pointer transition active:scale-90"
-                    >+</button>
-                  </div>
-                </div>
-
-                {/* X and Y offsets */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <div className="flex justify-between text-xs font-sans text-slate-400">
-                      <span>↔️ ទីតាំង ឆ្វេង-ស្តាំ (X Offset)</span>
-                      <span className="font-mono text-slate-300">{Math.round(logoOffsetX)}px</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="range"
-                        min="-200"
-                        max="200"
-                        step="1"
-                        value={logoOffsetX}
-                        onChange={(e) => setLogoOffsetX(parseInt(e.target.value))}
-                        className="w-full accent-orange-500 cursor-ew-resize h-1 bg-white/10 rounded-lg appearance-none"
-                      />
-                      <button 
-                        onClick={() => setLogoOffsetX(0)}
-                        className="text-[10px] text-slate-500 hover:text-white bg-[#1E1E21] hover:bg-[#2A2A2E] px-1.5 py-1 rounded cursor-pointer"
-                      >Reset</button>
-                    </div>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <div className="flex justify-between text-xs font-sans text-slate-400">
-                      <span>↕️ ទីតាំង លើ-ក្រោម (Y Offset)</span>
-                      <span className="font-mono text-slate-300">{Math.round(logoOffsetY)}px</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="range"
-                        min="-150"
-                        max="250"
-                        step="1"
-                        value={logoOffsetY}
-                        onChange={(e) => setLogoOffsetY(parseInt(e.target.value))}
-                        className="w-full accent-orange-500 cursor-ew-resize h-1 bg-white/10 rounded-lg appearance-none"
-                      />
-                      <button 
-                        onClick={() => setLogoOffsetY(0)}
-                        className="text-[10px] text-slate-500 hover:text-white bg-[#1E1E21] hover:bg-[#2A2A2E] px-1.5 py-1 rounded cursor-pointer"
-                      >Reset</button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* DYNAMIC DRAGGABLE LAYERS & D-PAD COMPONENT */}
-          <div className="bg-[#161618] border border-white/5 p-5 rounded-2xl space-y-4 shadow-xl mb-4" id="draggable-layers-manager">
+          {/* UNIFIED PHOTOSHOP-STYLE LAYER PROPERTIES EDITOR */}
+          <div className="bg-[#161618] border border-white/5 p-5 rounded-2xl space-y-4 shadow-xl" id="unified-photoshop-layer-editor">
             <div className="flex items-center justify-between border-b border-white/5 pb-3">
               <div className="flex items-center gap-2">
                 <Layers className="w-4 h-4 text-orange-500 animate-pulse" />
                 <h3 className="text-white text-sm font-sans font-semibold">
-                  {lang === 'km' ? 'គ្រប់គ្រងស្រទាប់ និងអូសទីតាំង (Poster Layers Manager)' : 'Layers Position Selector & Drag Controls'}
+                  {lang === 'km' ? 'ផ្ទាំងគ្រប់គ្រងស្រទាប់ប្លង់ឌីហ្សាញ (Photoshop Layer Properties)' : 'Photoshop-Style Layer Properties'}
                 </h3>
               </div>
               <button
@@ -2151,17 +2027,17 @@ export default function PosterGenerator({
                   setCongratsOffsetX(0); setCongratsOffsetY(0);
                   setLogoOffsetX(0); setLogoOffsetY(0);
                 }}
-                className="text-[10px] text-slate-400 hover:text-orange-500 flex items-center gap-1 cursor-pointer transition hover:underline"
+                className="text-[10px] text-slate-400 hover:text-orange-500 flex items-center gap-1 cursor-pointer transition hover:underline font-sans"
               >
                 <RotateCcw className="w-3 h-3" />
-                <span>Reset ទីតាំងទាំងអស់</span>
+                <span>Reset ទីតាំងទាំងអស់ (Reset Offsets)</span>
               </button>
             </div>
 
             <p className="text-[11px] text-slate-400 font-sans leading-relaxed">
               {lang === 'km' 
-                ? 'ជ្រើសរើសស្រទាប់ខាងក្រោម រួចចុចអូសឆ្វេងស្តាំលើក្រោមផ្ទាល់លើរូបភាព ឬចុចប៊ូតុងបញ្ជា (D-Pad) ខាងក្រោមបន្ទាប់៖' 
-                : 'Select any layer below to drag it interactively on the poster preview, or use the direction controls to adjust precisely:'}
+                ? 'មុខងារគ្រប់គ្រងទីតាំង សរសេរអក្សរ ប្តូរពណ៌ និងទំហំបង្រួមពង្រីក ត្រូវបានកំណត់រួមគ្នាតែមួយ (Photoshop Palette)។ ចុចលើស្រទាប់ឌីហ្សាញណាមួយខាងក្រោម ដើម្បីកកែប្រែដោយសេរី៖' 
+                : 'Unified editor for text values, custom colors, sizing (zoom), and 4-way drag nudging. Selecting any layer opens its corresponding toolset instantly:'}
             </p>
 
             {/* List of Layers, Styled beautifully like layers */}
@@ -2170,16 +2046,16 @@ export default function PosterGenerator({
               {/* Logo Layer */}
               <div 
                 onClick={() => setActiveDraggableLayer('logo')}
-                className={`flex items-center justify-between p-2 rounded-lg border transition cursor-pointer ${
+                className={`flex items-center justify-between p-2.5 rounded-lg border transition cursor-pointer ${
                   activeDraggableLayer === 'logo' 
-                    ? 'bg-orange-500/10 border-orange-500/50 text-white font-bold' 
+                    ? 'bg-orange-500/10 border-orange-500/50 text-white font-bold shadow-md shadow-orange-500/5' 
                     : 'bg-[#141416] border-white/5 text-slate-300 hover:bg-white/5'
                 }`}
               >
-                <div className="flex items-center gap-2 overflow-hidden">
-                  <span className="text-xs shrink-0">🏷️</span>
+                <div className="flex items-center gap-1.5 overflow-hidden">
+                  <span className="text-xs shrink-0">{logo ? '🏷️' : '⚠️'}</span>
                   <div className="text-[11px] font-sans truncate pr-1">
-                    <span className="block">{lang === 'km' ? 'ឡូហ្គោម៉ាក' : 'Brand Logo'}</span>
+                    <span className="block font-medium">{lang === 'km' ? 'ឡូហ្គោម៉ាក' : 'Brand Logo'}</span>
                     <span className="text-[9px] text-slate-500 font-mono">X: {Math.round(logoOffsetX)}px, Y: {Math.round(logoOffsetY)}px</span>
                   </div>
                 </div>
@@ -2189,7 +2065,7 @@ export default function PosterGenerator({
                     e.stopPropagation();
                     setShowLayerLogo(!showLayerLogo);
                   }}
-                  className={`p-1 rounded hover:bg-white/10 text-slate-400 hover:text-white ${!showLayerLogo ? 'opacity-40' : ''}`}
+                  className={`p-1 rounded hover:bg-white/10 text-slate-400 hover:text-white transition ${!showLayerLogo ? 'opacity-40' : ''}`}
                 >
                   {showLayerLogo ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
                 </button>
@@ -2198,16 +2074,16 @@ export default function PosterGenerator({
               {/* Secondary Header Layer */}
               <div 
                 onClick={() => setActiveDraggableLayer('header')}
-                className={`flex items-center justify-between p-2 rounded-lg border transition cursor-pointer ${
+                className={`flex items-center justify-between p-2.5 rounded-lg border transition cursor-pointer ${
                   activeDraggableLayer === 'header' 
-                    ? 'bg-orange-500/10 border-orange-500/50 text-white font-bold' 
+                    ? 'bg-orange-500/10 border-orange-500/50 text-white font-bold shadow-md shadow-orange-500/5' 
                     : 'bg-[#141416] border-white/5 text-slate-300 hover:bg-white/5'
                 }`}
               >
-                <div className="flex items-center gap-2 overflow-hidden">
+                <div className="flex items-center gap-1.5 overflow-hidden">
                   <span className="text-xs shrink-0">✍️</span>
                   <div className="text-[11px] font-sans truncate pr-1">
-                    <span className="block">{lang === 'km' ? 'អក្សរលើក្បាល' : 'Header Greeting'}</span>
+                    <span className="block font-medium">{lang === 'km' ? 'អក្សរលើក្បាល' : 'Header Greeting'}</span>
                     <span className="text-[9px] text-slate-500 font-mono">X: {Math.round(headerOffsetX)}px, Y: {Math.round(headerOffsetY)}px</span>
                   </div>
                 </div>
@@ -2217,7 +2093,7 @@ export default function PosterGenerator({
                     e.stopPropagation();
                     setShowLayerHeader(!showLayerHeader);
                   }}
-                  className={`p-1 rounded hover:bg-white/10 text-slate-400 hover:text-white ${!showLayerHeader ? 'opacity-40' : ''}`}
+                  className={`p-1 rounded hover:bg-white/10 text-slate-400 hover:text-white transition ${!showLayerHeader ? 'opacity-40' : ''}`}
                 >
                   {showLayerHeader ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
                 </button>
@@ -2226,16 +2102,16 @@ export default function PosterGenerator({
               {/* Main Title Layer */}
               <div 
                 onClick={() => setActiveDraggableLayer('main-title')}
-                className={`flex items-center justify-between p-2 rounded-lg border transition cursor-pointer ${
+                className={`flex items-center justify-between p-2.5 rounded-lg border transition cursor-pointer ${
                   activeDraggableLayer === 'main-title' 
-                    ? 'bg-orange-500/10 border-orange-500/50 text-white font-bold' 
+                    ? 'bg-orange-500/10 border-orange-500/50 text-white font-bold shadow-md shadow-orange-500/5' 
                     : 'bg-[#141416] border-white/5 text-slate-300 hover:bg-white/5'
                 }`}
               >
-                <div className="flex items-center gap-2 overflow-hidden">
+                <div className="flex items-center gap-1.5 overflow-hidden">
                   <span className="text-xs shrink-0">🔠</span>
                   <div className="text-[11px] font-sans truncate pr-1">
-                    <span className="block">{lang === 'km' ? 'ចំណងជើងធំ' : 'Main Title'}</span>
+                    <span className="block font-medium">{lang === 'km' ? 'ចំណងជើងធំ' : 'Main Headline'}</span>
                     <span className="text-[9px] text-slate-500 font-mono">X: {Math.round(mainTitleOffsetX)}px, Y: {Math.round(mainTitleOffsetY)}px</span>
                   </div>
                 </div>
@@ -2245,7 +2121,7 @@ export default function PosterGenerator({
                     e.stopPropagation();
                     setShowLayerMainTitle(!showLayerMainTitle);
                   }}
-                  className={`p-1 rounded hover:bg-white/10 text-slate-400 hover:text-white ${!showLayerMainTitle ? 'opacity-40' : ''}`}
+                  className={`p-1 rounded hover:bg-white/10 text-slate-400 hover:text-white transition ${!showLayerMainTitle ? 'opacity-40' : ''}`}
                 >
                   {showLayerMainTitle ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
                 </button>
@@ -2254,16 +2130,16 @@ export default function PosterGenerator({
               {/* Subtitle Ribbon */}
               <div 
                 onClick={() => setActiveDraggableLayer('sub-title')}
-                className={`flex items-center justify-between p-2 rounded-lg border transition cursor-pointer ${
+                className={`flex items-center justify-between p-2.5 rounded-lg border transition cursor-pointer ${
                   activeDraggableLayer === 'sub-title' 
-                    ? 'bg-orange-500/10 border-orange-500/50 text-white font-bold' 
+                    ? 'bg-orange-500/10 border-orange-500/50 text-white font-bold shadow-md shadow-orange-500/5' 
                     : 'bg-[#141416] border-white/5 text-slate-300 hover:bg-white/5'
                 }`}
               >
-                <div className="flex items-center gap-2 overflow-hidden">
+                <div className="flex items-center gap-1.5 overflow-hidden">
                   <span className="text-xs shrink-0">🎗️</span>
                   <div className="text-[11px] font-sans truncate pr-1">
-                    <span className="block">{lang === 'km' ? 'បូរចំណងជើងរង' : 'Ribbon Subtitle'}</span>
+                    <span className="block font-medium">{lang === 'km' ? 'បូរចំណងជើងរង' : 'Ribbon Banner'}</span>
                     <span className="text-[9px] text-slate-500 font-mono">X: {Math.round(subTitleOffsetX)}px, Y: {Math.round(subTitleOffsetY)}px</span>
                   </div>
                 </div>
@@ -2273,7 +2149,7 @@ export default function PosterGenerator({
                     e.stopPropagation();
                     setShowLayerRibbon(!showLayerRibbon);
                   }}
-                  className={`p-1 rounded hover:bg-white/10 text-slate-400 hover:text-white ${!showLayerRibbon ? 'opacity-40' : ''}`}
+                  className={`p-1 rounded hover:bg-white/10 text-slate-400 hover:text-white transition ${!showLayerRibbon ? 'opacity-40' : ''}`}
                 >
                   {showLayerRibbon ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
                 </button>
@@ -2282,16 +2158,16 @@ export default function PosterGenerator({
               {/* Winners Row Cards */}
               <div 
                 onClick={() => setActiveDraggableLayer('winners')}
-                className={`flex items-center justify-between p-2 rounded-lg border transition cursor-pointer ${
+                className={`flex items-center justify-between p-2.5 rounded-lg border transition cursor-pointer ${
                   activeDraggableLayer === 'winners' 
-                    ? 'bg-orange-500/10 border-orange-500/50 text-white font-bold' 
+                    ? 'bg-orange-500/10 border-orange-500/50 text-white font-bold shadow-md shadow-orange-500/5' 
                     : 'bg-[#141416] border-white/5 text-slate-300 hover:bg-white/5'
                 }`}
               >
-                <div className="flex items-center gap-2 overflow-hidden">
+                <div className="flex items-center gap-1.5 overflow-hidden">
                   <span className="text-xs shrink-0">🏆</span>
                   <div className="text-[11px] font-sans truncate pr-1">
-                    <span className="block">{lang === 'km' ? 'កាតម្ចាស់រង្វាន់' : 'Winners List Block'}</span>
+                    <span className="block font-medium">{lang === 'km' ? 'កាតម្ចាស់រង្វាន់' : 'Winners Cards Grid'}</span>
                     <span className="text-[9px] text-slate-500 font-mono">X: {Math.round(winnersOffsetX)}px, Y: {Math.round(winnersOffsetY)}px</span>
                   </div>
                 </div>
@@ -2301,7 +2177,7 @@ export default function PosterGenerator({
                     e.stopPropagation();
                     setShowLayerWinners(!showLayerWinners);
                   }}
-                  className={`p-1 rounded hover:bg-white/10 text-slate-400 hover:text-white ${!showLayerWinners ? 'opacity-40' : ''}`}
+                  className={`p-1 rounded hover:bg-white/10 text-slate-400 hover:text-white transition ${!showLayerWinners ? 'opacity-40' : ''}`}
                 >
                   {showLayerWinners ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
                 </button>
@@ -2310,16 +2186,16 @@ export default function PosterGenerator({
               {/* Bottom Congrats text */}
               <div 
                 onClick={() => setActiveDraggableLayer('congrats')}
-                className={`flex items-center justify-between p-2 rounded-lg border transition cursor-pointer ${
+                className={`flex items-center justify-between p-2.5 rounded-lg border transition cursor-pointer ${
                   activeDraggableLayer === 'congrats' 
-                    ? 'bg-orange-500/10 border-orange-500/50 text-white font-bold' 
+                    ? 'bg-orange-500/10 border-orange-500/50 text-white font-bold shadow-md shadow-orange-500/5' 
                     : 'bg-[#141416] border-white/5 text-slate-300 hover:bg-white/5'
                 }`}
               >
-                <div className="flex items-center gap-2 overflow-hidden">
+                <div className="flex items-center gap-1.5 overflow-hidden">
                   <span className="text-xs shrink-0">💬</span>
                   <div className="text-[11px] font-sans truncate pr-1">
-                    <span className="block">{lang === 'km' ? 'សារខាងក្រោម' : 'Bottom Wishes'}</span>
+                    <span className="block font-medium">{lang === 'km' ? 'សារខាងក្រោម' : 'Wishes Message'}</span>
                     <span className="text-[9px] text-slate-500 font-mono">X: {Math.round(congratsOffsetX)}px, Y: {Math.round(congratsOffsetY)}px</span>
                   </div>
                 </div>
@@ -2329,7 +2205,7 @@ export default function PosterGenerator({
                     e.stopPropagation();
                     setShowLayerCongrats(!showLayerCongrats);
                   }}
-                  className={`p-1 rounded hover:bg-white/10 text-slate-400 hover:text-white ${!showLayerCongrats ? 'opacity-40' : ''}`}
+                  className={`p-1 rounded hover:bg-white/10 text-slate-400 hover:text-white transition ${!showLayerCongrats ? 'opacity-40' : ''}`}
                 >
                   {showLayerCongrats ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
                 </button>
@@ -2338,37 +2214,469 @@ export default function PosterGenerator({
             </div>
 
             {/* Selected Active Layer Customizer D-Pad & Precise Manual adjustment */}
-            <div className="bg-[#111112] p-4 rounded-xl border border-white/5 space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-sans text-slate-300 font-semibold uppercase flex flex-wrap items-center gap-1">
+            <div className="bg-[#111112] p-4.5 rounded-xl border border-white/5 space-y-4 shadow-inner">
+              <div className="flex items-center justify-between border-b border-white/5 pb-2.5">
+                <span className="text-xs font-sans text-slate-300 font-bold uppercase flex flex-wrap items-center gap-1.5 font-sans">
                   <Move className="w-3.5 h-3.5 text-orange-500" />
                   <span>
-                    {lang === 'km' ? 'បញ្ជាទាញក្តាររំកិលទីតាំងស្រទាប់៖' : 'Active Layer Position Control:'}
+                    {lang === 'km' ? 'កែសម្រួលលក្ខណសម្បត្តិរបស់ស្រទាប់ (Layer Properties)៖' : 'Live Layer Properties:'}
                   </span>
-                  <span className="text-orange-500 font-bold ml-1">
+                  <span className="text-orange-500 font-extrabold ml-1 bg-orange-500/10 px-2 py-0.5 rounded border border-orange-500/20 text-[10px]">
                     {activeDraggableLayer === 'logo' ? (lang === 'km' ? 'ឡូហ្គោម៉ាក' : 'Brand Logo') :
                      activeDraggableLayer === 'header' ? (lang === 'km' ? 'អក្សរលើក្បាល' : 'Secondary Header') :
-                     activeDraggableLayer === 'main-title' ? (lang === 'km' ? 'ចំណងជើងធំ' : 'Main Title') :
+                     activeDraggableLayer === 'main-title' ? (lang === 'km' ? 'ចំណងជើងធំ' : 'Main Host Headline') :
                      activeDraggableLayer === 'sub-title' ? (lang === 'km' ? 'បូរចំណងជើងរង' : 'Ribbon Subtitle') :
-                     activeDraggableLayer === 'winners' ? (lang === 'km' ? 'កាតម្ចាស់រង្វាន់' : 'Winners List Block') :
-                     (lang === 'km' ? 'សារអបអរសាទរខាងក្រោម' : 'Congratulations Banner Text')}
+                     activeDraggableLayer === 'winners' ? (lang === 'km' ? 'កាតម្ចាស់រង្វាន់' : 'Winners Grid Block') :
+                     (lang === 'km' ? 'សារអបអរសាទរខាងក្រោម' : 'Bottom Wishes Banner')}
                   </span>
                 </span>
                 <button
                   onClick={() => {
-                    if (activeDraggableLayer === 'logo') { setLogoOffsetX(0); setLogoOffsetY(0); }
-                    else if (activeDraggableLayer === 'header') { setHeaderOffsetX(0); setHeaderOffsetY(0); }
-                    else if (activeDraggableLayer === 'main-title') { setMainTitleOffsetX(0); setMainTitleOffsetY(0); }
-                    else if (activeDraggableLayer === 'sub-title') { setSubTitleOffsetX(0); setSubTitleOffsetY(0); }
-                    else if (activeDraggableLayer === 'winners') { setWinnersOffsetX(0); setWinnersOffsetY(0); }
-                    else if (activeDraggableLayer === 'congrats') { setCongratsOffsetX(0); setCongratsOffsetY(0); }
+                    if (activeDraggableLayer === 'logo') { setLogoOffsetX(0); setLogoOffsetY(0); setLogoScale(1.0); setLogoUseOriginalShape(true); }
+                    else if (activeDraggableLayer === 'header') { setHeaderOffsetX(0); setHeaderOffsetY(0); setHeaderScale(1.0); setHeaderColor(''); setIsHeaderGradient(false); }
+                    else if (activeDraggableLayer === 'main-title') { setMainTitleOffsetX(0); setMainTitleOffsetY(0); setMainTitleScale(1.0); setMainTitleColor1('#FFFFFF'); setMainTitleColor2('#FFF2CD'); setIsMainTitleGradient(true); }
+                    else if (activeDraggableLayer === 'sub-title') { setSubTitleOffsetX(0); setSubTitleOffsetY(0); setSubTitleScale(1.0); setSubTitleColor(''); }
+                    else if (activeDraggableLayer === 'winners') { setWinnersOffsetX(0); setWinnersOffsetY(0); setPrize1Scale(1.0); setPrize2Scale(1.0); setPrize3Scale(1.0); setPrize1Color(''); setPrize2Color(''); setPrize3Color(''); }
+                    else if (activeDraggableLayer === 'congrats') { setCongratsOffsetX(0); setCongratsOffsetY(0); setCongratsScale(1.0); setCongratsColor(''); setIsCongratsGradient(false); }
                   }}
-                  className="bg-white/5 hover:bg-white/10 hover:text-white text-slate-400 active:scale-95 py-1 px-2 rounded text-[10px] cursor-pointer transition flex items-center gap-1"
+                  className="bg-white/5 hover:bg-white/10 hover:text-white text-slate-400 active:scale-95 py-1 px-2 rounded text-[10.5px] cursor-pointer transition flex items-center gap-1 font-sans font-medium"
                 >
                   <RotateCcw className="w-2.5 h-2.5" />
-                  <span>Reset ទីតាំងដើម</span>
+                  <span>Reset ស្រទាប់រៀងៗខ្លួន</span>
                 </button>
               </div>
+
+              {/* Dynamic properties view based on active selected layer */}
+              {activeDraggableLayer === 'logo' && (
+                <div className="space-y-4 animate-fade-in">
+                  {!logo ? (
+                    <div className="text-center py-5 bg-[#161618] border border-white/5 rounded-xl p-4 space-y-2">
+                      <p className="text-xs text-slate-400 font-sans">
+                        {lang === 'km' ? '⚠️ សូមស្វែងរក និងផ្ទុកឡើង Logo ក្រុមហ៊ុនខាងលើជាមុនសិន ដើម្បីដំណើរការគ្រប់គ្រងទីតាំង និងទំហំ។' : '⚠️ Please search or upload a corporate logo above first to configure its positioning & size.'}
+                      </p>
+                    </div>
+                  ) : (
+                    <>
+                      {/* Logo Aspect mode toggle */}
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-[#161618] p-3 rounded-lg border border-white/5 gap-2">
+                        <span className="text-xs text-slate-300 font-sans flex items-center gap-1.5">
+                          <Crop className="w-3.5 h-3.5 text-orange-500" />
+                          <span>{lang === 'km' ? 'ទម្រង់គែមរូបភាព Logo៖' : 'Logo Border Shapes:'}</span>
+                        </span>
+                        <div className="flex bg-[#1E1E21] p-0.5 rounded-lg border border-white/5 shrink-0 self-start sm:self-auto">
+                          <button
+                            type="button"
+                            onClick={() => setLogoUseOriginalShape(true)}
+                            className={`px-3 py-1 rounded-md text-[10px] font-sans transition-all cursor-pointer ${logoUseOriginalShape ? 'bg-orange-600 text-white font-bold' : 'text-slate-400'}`}
+                          >
+                            {lang === 'km' ? 'រក្សាទម្រង់ដើម (Aspect)' : 'Aspect Ratio'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setLogoUseOriginalShape(false)}
+                            className={`px-3 py-1 rounded-md text-[10px] font-sans transition-all cursor-pointer ${!logoUseOriginalShape ? 'bg-orange-600 text-white font-bold' : 'text-slate-400'}`}
+                          >
+                            {lang === 'km' ? 'កាត់ជារង្វង់មូល (Circular)' : 'Circular Clip'}
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Logo Zoom slider */}
+                      <div className="space-y-1.5">
+                        <div className="flex justify-between text-xs font-sans text-slate-400">
+                          <span>🔍 {lang === 'km' ? 'ទំហំពង្រីក-បង្រួម (Logo Zoom Scale)' : 'Logo Zoom Scale'}</span>
+                          <span className="font-mono text-orange-500 font-bold">{Math.round(logoScale * 100)}%</span>
+                        </div>
+                        <input
+                          type="range"
+                          min="0.2"
+                          max="3.0"
+                          step="0.05"
+                          value={logoScale}
+                          onChange={(e) => setLogoScale(parseFloat(e.target.value))}
+                          className="w-full accent-orange-500 cursor-ew-resize h-1 bg-white/10 rounded-lg appearance-none"
+                        />
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+
+              {activeDraggableLayer === 'header' && (
+                <div className="space-y-4 animate-fade-in text-slate-300 font-sans">
+                  {/* Text value */}
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] text-slate-400 font-sans font-bold block">{lang === 'km' ? 'កែអក្សរផ្ទាល់ខ្លួន (Header Greeting Content)៖' : 'Edit Header Greeting Content:'}</label>
+                    <input
+                      type="text"
+                      value={headerText}
+                      onChange={(e) => setHeaderText(e.target.value)}
+                      className="w-full bg-[#18181A] border border-[#2A2A2E] rounded-lg px-2.5 py-1.5 text-xs text-white focus:border-orange-500 focus:outline-none"
+                      placeholder={lang === 'km' ? 'អបអរសាទរម្ចាស់រង្វាន់' : 'Congratulations Winners!'}
+                    />
+                  </div>
+
+                  {/* Colors & Gradient Mixers */}
+                  <div className="bg-[#161618] p-3 rounded-xl border border-white/5 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] text-slate-400 font-sans">{lang === 'km' ? 'លាយពណ៌ផ្ទៃអក្សរ (Header Colors Solid/Gradient)៖' : 'Header Colors Solid/Gradient:'}</span>
+                      <label className="flex items-center gap-1.5 cursor-pointer text-[10px] text-slate-400">
+                        <input
+                          type="checkbox"
+                          checked={isHeaderGradient}
+                          onChange={(e) => setIsHeaderGradient(e.target.checked)}
+                          className="accent-orange-500 rounded"
+                        />
+                        <span>Gradient (លាយពីរពណ៌)</span>
+                      </label>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <span className="text-[9px] text-slate-500 font-sans uppercase block">Color 1 (Solid)</span>
+                        <div className="flex items-center gap-1.5">
+                          <input
+                            type="color"
+                            value={headerColor || '#FFFFFF'}
+                            onChange={(e) => setHeaderColor(e.target.value)}
+                            className="w-full bg-[#18181A] border border-white/5 rounded-lg h-8 cursor-pointer p-0"
+                          />
+                          <button onClick={() => setHeaderColor('')} className="text-[9px] text-slate-400 hover:text-white bg-white/5 px-2 py-1 rounded">Reset</button>
+                        </div>
+                      </div>
+                      <div className="space-y-1">
+                        <span className="text-[9px] text-slate-500 font-sans uppercase block">Color 2</span>
+                        <input
+                          type="color"
+                          value={headerColor2}
+                          disabled={!isHeaderGradient}
+                          onChange={(e) => setHeaderColor2(e.target.value)}
+                          className={`w-full bg-[#18181A] border border-white/5 rounded-lg h-8 cursor-pointer p-0 ${!isHeaderGradient ? 'opacity-30 cursor-not-allowed' : ''}`}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Zoom field */}
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between text-xs text-slate-400">
+                      <span>🔍 {lang === 'km' ? 'ទំហំពង្រីក-បង្រួមក្បាលអក្សរ (Header Zoom)' : 'Header Text Scale'}</span>
+                      <span className="font-mono text-orange-500 font-bold">{Math.round(headerScale * 100)}%</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0.5"
+                      max="2.0"
+                      step="0.05"
+                      value={headerScale}
+                      onChange={(e) => setHeaderScale(parseFloat(e.target.value))}
+                      className="w-full accent-orange-500 cursor-ew-resize h-1 bg-white/10 rounded-lg appearance-none"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {activeDraggableLayer === 'main-title' && (
+                <div className="space-y-4 animate-fade-in text-slate-300 font-sans">
+                  {/* Title text */}
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] text-slate-400 font-sans font-bold block">{lang === 'km' ? 'ចំណងជើងធំចម្បង (Main Title headline Text)៖' : 'Main Title Headline Text:'}</label>
+                    <input
+                      type="text"
+                      value={mainTitleText}
+                      onChange={(e) => setMainTitleText(e.target.value)}
+                      className="w-full bg-[#18181A] border border-[#2A2A2E] rounded-lg px-2.5 py-1.5 text-xs text-white focus:border-orange-500 focus:outline-none"
+                      placeholder="GIVEAWAY"
+                    />
+                  </div>
+
+                  {/* Color settings */}
+                  <div className="bg-[#161618] p-3 rounded-xl border border-white/5 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] text-slate-400 font-sans">{lang === 'km' ? 'លាយពណ៌ផ្ទៃអក្សរធំ (Grand Title Colors Mix)៖' : 'Grand Title Colors Mix:'}</span>
+                      <label className="flex items-center gap-1.5 cursor-pointer text-[10px] text-slate-400">
+                        <input
+                          type="checkbox"
+                          checked={isMainTitleGradient}
+                          onChange={(e) => setIsMainTitleGradient(e.target.checked)}
+                          className="accent-orange-500 rounded"
+                        />
+                        <span>Gradient (លាយពីរពណ៌)</span>
+                      </label>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <span className="text-[9px] text-slate-500 font-sans uppercase block">Color 1 (Solid)</span>
+                        <input
+                          type="color"
+                          value={mainTitleColor1}
+                          onChange={(e) => setMainTitleColor1(e.target.value)}
+                          className="w-full bg-[#18181A] border border-white/5 rounded-lg h-8 cursor-pointer p-0"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <span className="text-[9px] text-slate-500 font-sans uppercase block">Color 2</span>
+                        <input
+                          type="color"
+                          value={mainTitleColor2}
+                          disabled={!isMainTitleGradient}
+                          onChange={(e) => setMainTitleColor2(e.target.value)}
+                          className={`w-full bg-[#18181A] border border-white/5 rounded-lg h-8 cursor-pointer p-0 ${!isMainTitleGradient ? 'opacity-30 cursor-not-allowed' : ''}`}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Sizing scale */}
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between text-xs text-slate-400">
+                      <span>🔍 {lang === 'km' ? 'ទំហំពង្រីក-បង្រួមចំណងជើង (Title Scale)' : 'Title Text Scale'}</span>
+                      <span className="font-mono text-orange-500 font-bold">{Math.round(mainTitleScale * 100)}%</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0.5"
+                      max="2.5"
+                      step="0.05"
+                      value={mainTitleScale}
+                      onChange={(e) => setMainTitleScale(parseFloat(e.target.value))}
+                      className="w-full accent-orange-500 cursor-ew-resize h-1 bg-white/10 rounded-lg appearance-none"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {activeDraggableLayer === 'sub-title' && (
+                <div className="space-y-4 animate-fade-in text-slate-300 font-sans">
+                  {/* Ribbon text */}
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] text-slate-400 font-sans font-bold block">{lang === 'km' ? 'សរសេរអក្សរលើបូរ (Ribbon Content text)៖' : 'Ribbon Content Text:'}</label>
+                    <input
+                      type="text"
+                      value={subTitleText}
+                      onChange={(e) => setSubTitleText(e.target.value)}
+                      className="w-full bg-[#18181A] border border-[#2A2A2E] rounded-lg px-2.5 py-1.5 text-xs text-white focus:border-orange-500 focus:outline-[#f97316]"
+                      placeholder="🏆 WINNERS 🏆"
+                    />
+                  </div>
+
+                  {/* Ribbon Color customization */}
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] text-slate-400 block">{lang === 'km' ? 'ពណ៌អក្សរលើយបូរ (Ribbon Text Color Override)៖' : 'Ribbon Text Color Override:'}</label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="color"
+                        value={subTitleColor || '#F97316'}
+                        onChange={(e) => setSubTitleColor(e.target.value)}
+                        className="w-[60px] bg-[#18181A] border border-white/5 rounded h-8 cursor-pointer p-0"
+                      />
+                      <button 
+                        onClick={() => setSubTitleColor('')} 
+                        className="text-[10px] bg-[#1E1E21] hover:bg-[#2A2A2E] text-slate-400 hover:text-white px-2.5 py-1.5 rounded transition cursor-pointer font-sans"
+                      >
+                        Reset Override
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Sizing Slider */}
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between text-xs text-slate-400">
+                      <span>🔍 {lang === 'km' ? 'ទំហំបូរចំណងជើងរង (Ribbon Scale)' : 'Ribbon Sizing scale'}</span>
+                      <span className="font-mono text-orange-500 font-bold">{Math.round(subTitleScale * 100)}%</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0.5"
+                      max="2.0"
+                      step="0.05"
+                      value={subTitleScale}
+                      onChange={(e) => setSubTitleScale(parseFloat(e.target.value))}
+                      className="w-full accent-orange-500 cursor-ew-resize h-1 bg-white/10 rounded-lg appearance-none"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {activeDraggableLayer === 'congrats' && (
+                <div className="space-y-4 animate-fade-in text-slate-300 font-sans">
+                  {/* Wishes content text area */}
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] text-slate-400 font-sans font-bold block">{lang === 'km' ? 'សំណេរអបអរសាទរខាងក្រោម (Congrats Wishes Message)៖' : 'Bottom Wishes Message:'}</label>
+                    <textarea
+                      value={congratsText}
+                      onChange={(e) => setCongratsText(e.target.value)}
+                      className="w-full bg-[#18181A] border border-[#2A2A2E] rounded-lg px-2.5 py-1.5 text-xs text-white min-h-[50px] focus:outline-[#f97316] resize-none font-sans"
+                      placeholder="អបអរសាទរអ្នកឈ្នះទាំងអស់គ្នា!..."
+                    />
+                  </div>
+
+                  {/* Colors override */}
+                  <div className="bg-[#161618] p-3 rounded-xl border border-white/5 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] text-slate-400 font-sans">{lang === 'km' ? 'ពណ៌សំណេរសារខាងក្រោម (Bottom Wishes Colors Mix)៖' : 'Bottom Wishes Colors Mix:'}</span>
+                      <label className="flex items-center gap-1.5 cursor-pointer text-[10px] text-slate-400">
+                        <input
+                          type="checkbox"
+                          checked={isCongratsGradient}
+                          onChange={(e) => setIsCongratsGradient(e.target.checked)}
+                          className="accent-orange-500 rounded"
+                        />
+                        <span>Gradient (លាយពីរពណ៌)</span>
+                      </label>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <span className="text-[9px] text-slate-500 font-sans uppercase block">Color 1 (Solid)</span>
+                        <div className="flex items-center gap-1.5">
+                          <input
+                            type="color"
+                            value={congratsColor || '#FFFFFF'}
+                            onChange={(e) => setCongratsColor(e.target.value)}
+                            className="w-full bg-[#18181A] border border-white/5 rounded-lg h-8 cursor-pointer p-0"
+                          />
+                          <button onClick={() => setCongratsColor('')} className="text-[9px] text-slate-400 hover:text-white bg-white/5 px-2 py-1 rounded font-sans">Reset</button>
+                        </div>
+                      </div>
+                      <div className="space-y-1">
+                        <span className="text-[9px] text-slate-500 font-sans uppercase block">Color 2</span>
+                        <input
+                          type="color"
+                          value={congratsColor2}
+                          disabled={!isCongratsGradient}
+                          onChange={(e) => setCongratsColor2(e.target.value)}
+                          className={`w-full bg-[#18181A] border border-white/5 rounded-lg h-8 cursor-pointer p-0 ${!isCongratsGradient ? 'opacity-30 cursor-not-allowed' : ''}`}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Wishes message scale */}
+                  <div className="space-y-1.5 font-sans">
+                    <div className="flex justify-between text-xs text-slate-400">
+                      <span>🔍 {lang === 'km' ? 'ទំហំអក្សរសារខាងក្រោម (Wishes Zoom)' : 'Wishes Text Zoom'}</span>
+                      <span className="font-mono text-orange-500 font-bold">{Math.round(congratsScale * 100)}%</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0.5"
+                      max="2.0"
+                      step="0.05"
+                      value={congratsScale}
+                      onChange={(e) => setCongratsScale(parseFloat(e.target.value))}
+                      className="w-full accent-orange-500 cursor-ew-resize h-1 bg-white/10 rounded-lg appearance-none"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {activeDraggableLayer === 'winners' && (
+                <div className="space-y-4 animate-fade-in text-slate-300">
+                  <div className="bg-[#161618] p-3 rounded-xl border border-white/5 space-y-4">
+                    <div className="flex items-center gap-1.5 border-b border-white/5 pb-2">
+                      <Gift className="w-3.5 h-3.5 text-orange-500 animate-bounce" />
+                      <span className="text-xs font-sans text-slate-300 font-bold">
+                        {lang === 'km' ? 'ពង្រីក-បង្រួម & ដូរពណ៌ពានរង្វាន់ជាពិសេស (Prizes Individual Style Editor)៖' : 'Prizes Sizing & Color Editor:'}
+                      </span>
+                    </div>
+
+                    {/* Prize 🥇 */}
+                    <div className="space-y-1.5 pb-2.5 border-b border-white/5 font-sans">
+                      <div className="flex justify-between text-[11px] font-sans">
+                        <span className="font-semibold text-slate-300 flex items-center gap-1">
+                          <span>🥇</span>
+                          <span>{lang === 'km' ? 'រង្វាន់ទី ១' : 'Prize 1'} ({prizes[1]?.title || '...'})</span>
+                        </span>
+                        <span className="text-orange-500 font-bold font-mono text-[10px]">{Math.round(prize1Scale * 100)}%</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3 items-center font-sans">
+                        <div className="flex items-center gap-1.5">
+                          <input
+                            type="color"
+                            value={prize1Color || '#94A3B8'}
+                            onChange={(e) => setPrize1Color(e.target.value)}
+                            className="w-9 h-7 bg-transparent cursor-pointer p-0 shrink-0"
+                          />
+                          <button onClick={() => setPrize1Color('')} className="text-[9.5px] bg-[#1E1E21] hover:bg-[#2A2A2E] text-slate-400 rounded px-1.5 py-1">Reset</button>
+                        </div>
+                        <input
+                          type="range"
+                          min="0.5"
+                          max="2.5"
+                          step="0.05"
+                          value={prize1Scale}
+                          onChange={(e) => setPrize1Scale(parseFloat(e.target.value))}
+                          className="accent-orange-500 h-1 bg-white/10 rounded-lg appearance-none w-full cursor-ew-resize"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Prize 🥈 */}
+                    <div className="space-y-1.5 pb-2.5 border-b border-white/5 font-sans">
+                      <div className="flex justify-between text-[11px] font-sans">
+                        <span className="font-semibold text-slate-300 flex items-center gap-1">
+                          <span>🥈</span>
+                          <span>{lang === 'km' ? 'រង្វាន់ទី ២' : 'Prize 2'} ({prizes[2]?.title || '...'})</span>
+                        </span>
+                        <span className="text-orange-500 font-bold font-mono text-[10px]">{Math.round(prize2Scale * 100)}%</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3 items-center font-sans">
+                        <div className="flex items-center gap-1.5">
+                          <input
+                            type="color"
+                            value={prize2Color || '#94A3B8'}
+                            onChange={(e) => setPrize2Color(e.target.value)}
+                            className="w-9 h-7 bg-transparent cursor-pointer p-0 shrink-0"
+                          />
+                          <button onClick={() => setPrize2Color('')} className="text-[9.5px] bg-[#1E1E21] hover:bg-[#2A2A2E] text-slate-400 rounded px-1.5 py-1">Reset</button>
+                        </div>
+                        <input
+                          type="range"
+                          min="0.5"
+                          max="2.5"
+                          step="0.05"
+                          value={prize2Scale}
+                          onChange={(e) => setPrize2Scale(parseFloat(e.target.value))}
+                          className="accent-orange-500 h-1 bg-white/10 rounded-lg appearance-none w-full cursor-ew-resize"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Prize 🥉 */}
+                    <div className="space-y-1.5 font-sans">
+                      <div className="flex justify-between text-[11px] font-sans">
+                        <span className="font-semibold text-slate-300 flex items-center gap-1">
+                          <span>🥉</span>
+                          <span>{lang === 'km' ? 'រង្វាន់ទី ៣' : 'Prize 3'} ({prizes[3]?.title || '...'})</span>
+                        </span>
+                        <span className="text-orange-500 font-bold font-mono text-[10px]">{Math.round(prize3Scale * 100)}%</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3 items-center font-sans">
+                        <div className="flex items-center gap-1.5">
+                          <input
+                            type="color"
+                            value={prize3Color || '#94A3B8'}
+                            onChange={(e) => setPrize3Color(e.target.value)}
+                            className="w-9 h-7 bg-transparent cursor-pointer p-0 shrink-0"
+                          />
+                          <button onClick={() => setPrize3Color('')} className="text-[9.5px] bg-[#1E1E21] hover:bg-[#2A2A2E] text-slate-400 rounded px-1.5 py-1 font-sans">Reset</button>
+                        </div>
+                        <input
+                          type="range"
+                          min="0.5"
+                          max="2.5"
+                          step="0.05"
+                          value={prize3Scale}
+                          onChange={(e) => setPrize3Scale(parseFloat(e.target.value))}
+                          className="accent-orange-500 h-1 bg-white/10 rounded-lg appearance-none w-full cursor-ew-resize"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* D-Pad controls & coordinates details */}
               <div className="flex flex-col sm:flex-row items-center justify-around gap-4 bg-[#0A0A0C] p-3 rounded-xl border border-white/5">
@@ -2538,313 +2846,8 @@ export default function PosterGenerator({
             </div>
           </div>
 
-          {/* ADVANCED TYPOGRAPHY, COLOR MIXERS & TEXT ZOOM PANEL */}
-          <div className="bg-[#161618] border border-white/5 p-5 rounded-2xl space-y-4 shadow-xl" id="poster-text-editors-panel">
-            <div className="flex items-center gap-2 border-b border-white/5 pb-3">
-              <Type className="w-4 h-4 text-orange-500 animate-pulse" />
-              <h3 className="text-white text-sm font-sans font-semibold">
-                {lang === 'km' ? 'កែសម្រួលអក្សរ និងពង្រីក-បង្រួម (Text Editor & Mix Colors)' : 'Poster Text Editor, Zoom & Color Mixers'}
-              </h3>
-            </div>
-
-            {/* 1. Header Title Text Row */}
-            <div className="space-y-2 bg-[#111112] p-3.5 rounded-xl border border-white/5">
-              <div className="flex flex-col sm:flex-row justify-between gap-1 sm:items-center">
-                <span className="text-xs font-sans text-slate-300 font-bold">1. {lang === 'km' ? 'អក្សរលើក្បាល (Secondary Header)' : 'Secondary Header'}</span>
-                <span className="text-[10px] text-orange-500 font-mono font-bold">Zoom: {Math.round(headerScale * 100)}%</span>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <input
-                  type="text"
-                  value={headerText}
-                  onChange={(e) => setHeaderText(e.target.value)}
-                  className="w-full bg-[#18181A] border border-white/5 rounded-lg px-2.5 py-1.5 text-xs text-white"
-                  placeholder={lang === 'km' ? 'អបអរសាទរម្ចាស់រង្វាន់' : 'Congratulations Winners!'}
-                />
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] text-slate-500 font-mono shrink-0">Color</span>
-                  <input
-                    type="color"
-                    value={headerColor || '#FFFFFF'}
-                    onChange={(e) => setHeaderColor(e.target.value)}
-                    className="w-full bg-[#18181A] border border-white/5 rounded-lg h-8 cursor-pointer p-0"
-                  />
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <input
-                  type="range"
-                  min="0.5"
-                  max="2.0"
-                  step="0.05"
-                  value={headerScale}
-                  onChange={(e) => setHeaderScale(parseFloat(e.target.value))}
-                  className="w-full accent-orange-500 cursor-ew-resize h-1 bg-white/10 rounded-lg appearance-none"
-                />
-              </div>
-            </div>
-
-            {/* 2. Main Title Text Row */}
-            <div className="space-y-2 bg-[#111112] p-3.5 rounded-xl border border-white/5">
-              <div className="flex flex-col sm:flex-row justify-between gap-1 sm:items-center">
-                <span className="text-xs font-sans text-slate-300 font-bold">2. {lang === 'km' ? 'ចំណងជើងធំ (Main Title Headline)' : 'Main Title Headline'}</span>
-                <span className="text-[10px] text-orange-500 font-mono font-bold">Zoom: {Math.round(mainTitleScale * 100)}%</span>
-              </div>
-              <input
-                type="text"
-                value={mainTitleText}
-                onChange={(e) => setMainTitleText(e.target.value)}
-                className="w-full bg-[#18181A] border border-white/5 rounded-lg px-2.5 py-1.5 text-xs text-white mb-1"
-                placeholder="GIVEAWAY"
-              />
-              
-              {/* Color Gradient Mixer controls */}
-              <div className="space-y-2 pt-1 border-t border-white/5">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] text-slate-400 font-sans">{lang === 'km' ? 'លាយពណ៌ផ្ទៃអក្សរ (Mix Gradient colors)៖' : 'Mix Gradient colors:'}</span>
-                  <label className="flex items-center gap-1.5 cursor-pointer text-[10px] text-slate-400">
-                    <input
-                      type="checkbox"
-                      checked={isMainTitleGradient}
-                      onChange={(e) => setIsMainTitleGradient(e.target.checked)}
-                      className="accent-orange-500 rounded"
-                    />
-                    <span>Gradient Mixer</span>
-                  </label>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <span className="text-[9px] text-slate-500 font-sans uppercase block">Color 1</span>
-                    <input
-                      type="color"
-                      value={mainTitleColor1}
-                      onChange={(e) => setMainTitleColor1(e.target.value)}
-                      className="w-full bg-[#18181A] border border-white/5 rounded-lg h-8 cursor-pointer p-0"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <span className="text-[9px] text-slate-500 font-sans uppercase block">Color 2</span>
-                    <input
-                      type="color"
-                      value={mainTitleColor2}
-                      disabled={!isMainTitleGradient}
-                      onChange={(e) => setMainTitleColor2(e.target.value)}
-                      className={`w-full bg-[#18181A] border border-white/5 rounded-lg h-8 cursor-pointer p-0 ${!isMainTitleGradient ? 'opacity-30 cursor-not-allowed' : ''}`}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2 pt-1">
-                <input
-                  type="range"
-                  min="0.5"
-                  max="2.5"
-                  step="0.05"
-                  value={mainTitleScale}
-                  onChange={(e) => setMainTitleScale(parseFloat(e.target.value))}
-                  className="w-full accent-orange-500 cursor-ew-resize h-1 bg-white/10 rounded-lg appearance-none"
-                />
-              </div>
-            </div>
-
-            {/* 3. Subtitle Ribbon Text Row */}
-            <div className="space-y-2 bg-[#111112] p-3.5 rounded-xl border border-white/5">
-              <div className="flex flex-col sm:flex-row justify-between gap-1 sm:items-center">
-                <span className="text-xs font-sans text-slate-300 font-bold">3. {lang === 'km' ? 'បូរចំណងជើងរង (Ribbon Subtitle)' : 'Subtitle Ribbon'}</span>
-                <span className="text-[10px] text-orange-500 font-mono font-bold">Zoom: {Math.round(subTitleScale * 100)}%</span>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <input
-                  type="text"
-                  value={subTitleText}
-                  onChange={(e) => setSubTitleText(e.target.value)}
-                  className="w-full bg-[#18181A] border border-white/5 rounded-lg px-2.5 py-1.5 text-xs text-white"
-                  placeholder="🏆 WINNERS 🏆"
-                />
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] text-slate-500 font-mono shrink-0">Color</span>
-                  <input
-                    type="color"
-                    value={subTitleColor || '#F97316'}
-                    onChange={(e) => setSubTitleColor(e.target.value)}
-                    className="w-full bg-[#18181A] border border-white/5 rounded-lg h-8 cursor-pointer p-0"
-                  />
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <input
-                  type="range"
-                  min="0.5"
-                  max="2.0"
-                  step="0.05"
-                  value={subTitleScale}
-                  onChange={(e) => setSubTitleScale(parseFloat(e.target.value))}
-                  className="w-full accent-orange-500 cursor-ew-resize h-1 bg-white/10 rounded-lg appearance-none"
-                />
-              </div>
-            </div>
-
-            {/* 4. Congratulations Bottom Message Row */}
-            <div className="space-y-2 bg-[#111112] p-3.5 rounded-xl border border-white/5">
-              <div className="flex flex-col sm:flex-row justify-between gap-1 sm:items-center">
-                <span className="text-xs font-sans text-slate-300 font-bold">4. {lang === 'km' ? 'សារអបអរសាទរខាងក្រោម (Bottom Message)' : 'Bottom Message'}</span>
-                <span className="text-[10px] text-orange-500 font-mono font-bold">Zoom: {Math.round(congratsScale * 100)}%</span>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <textarea
-                  value={congratsText}
-                  onChange={(e) => setCongratsText(e.target.value)}
-                  className="w-full bg-[#18181A] border border-white/5 rounded-lg px-2.5 py-1.5 text-xs text-white min-h-[46px] resize-none"
-                  placeholder="អបអរសាទរអ្នកឈ្នះទាំងអស់គ្នា!..."
-                />
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] text-slate-500 font-mono shrink-0">Color</span>
-                  <input
-                    type="color"
-                    value={congratsColor || '#FFFFFF'}
-                    onChange={(e) => setCongratsColor(e.target.value)}
-                    className="w-full bg-[#18181A] border border-white/5 rounded-lg h-10 cursor-pointer p-0"
-                  />
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <input
-                  type="range"
-                  min="0.5"
-                  max="2.0"
-                  step="0.05"
-                  value={congratsScale}
-                  onChange={(e) => setCongratsScale(parseFloat(e.target.value))}
-                  className="w-full accent-orange-500 cursor-ew-resize h-1 bg-white/10 rounded-lg appearance-none"
-                />
-              </div>
-            </div>
-
-            {/* 4.5. Prizes Style Customization Row */}
-            <div className="space-y-4 bg-[#111112] p-3.5 rounded-xl border border-white/5" id="prizes-style-panel">
-              <div className="flex items-center gap-1.5 border-b border-white/5 pb-2">
-                <Gift className="w-3.5 h-3.5 text-orange-500" />
-                <span className="text-xs font-sans text-slate-300 font-bold">
-                  {lang === 'km' ? 'កែសម្រួលពណ៌ និងទំហំរង្វាន់ (Prizes Style Customizer)' : 'Prizes Style & Zoom Controls'}
-                </span>
-              </div>
-
-              {/* Prize 1 Customization */}
-              <div className="space-y-2 pb-2.5 border-b border-white/5">
-                <div className="flex flex-col sm:flex-row justify-between gap-1 sm:items-center">
-                  <span className="text-[11px] font-sans text-slate-300 flex items-center gap-1.5 font-bold">
-                    <span>🥇</span>
-                    <span>{lang === 'km' ? 'រង្វាន់ទី ១' : 'Prize 1'} ({prizes[1]?.title || '...'})</span>
-                  </span>
-                  <span className="text-[10px] text-orange-500 font-mono font-bold">Zoom: {Math.round(prize1Scale * 100)}%</span>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] text-slate-500 font-mono shrink-0">Color</span>
-                    <input
-                      type="color"
-                      value={prize1Color || '#94A3B8'}
-                      onChange={(e) => setPrize1Color(e.target.value)}
-                      className="w-[#60px] bg-[#18181A] border border-white/5 rounded h-8 cursor-pointer p-0"
-                    />
-                    <button
-                      onClick={() => setPrize1Color('')}
-                      className="text-[10px] bg-white/5 hover:bg-white/10 px-2 py-1 rounded transition text-slate-400 cursor-pointer"
-                    >Reset</button>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="range"
-                      min="0.5"
-                      max="2.5"
-                      step="0.05"
-                      value={prize1Scale}
-                      onChange={(e) => setPrize1Scale(parseFloat(e.target.value))}
-                      className="w-full accent-orange-500 cursor-ew-resize h-1 bg-white/10 rounded-lg appearance-none"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Prize 2 Customization */}
-              <div className="space-y-2 pb-2.5 border-b border-white/5">
-                <div className="flex flex-col sm:flex-row justify-between gap-1 sm:items-center">
-                  <span className="text-[11px] font-sans text-slate-300 flex items-center gap-1.5 font-bold">
-                    <span>🥈</span>
-                    <span>{lang === 'km' ? 'រង្វាន់ទី ២' : 'Prize 2'} ({prizes[2]?.title || '...'})</span>
-                  </span>
-                  <span className="text-[10px] text-orange-500 font-mono font-bold">Zoom: {Math.round(prize2Scale * 100)}%</span>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] text-slate-500 font-mono shrink-0">Color</span>
-                    <input
-                      type="color"
-                      value={prize2Color || '#94A3B8'}
-                      onChange={(e) => setPrize2Color(e.target.value)}
-                      className="w-[#60px] bg-[#18181A] border border-white/5 rounded h-8 cursor-pointer p-0"
-                    />
-                    <button
-                      onClick={() => setPrize2Color('')}
-                      className="text-[10px] bg-white/5 hover:bg-white/10 px-2 py-1 rounded transition text-slate-400 cursor-pointer"
-                    >Reset</button>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="range"
-                      min="0.5"
-                      max="2.5"
-                      step="0.05"
-                      value={prize2Scale}
-                      onChange={(e) => setPrize2Scale(parseFloat(e.target.value))}
-                      className="w-full accent-orange-500 cursor-ew-resize h-1 bg-white/10 rounded-lg appearance-none"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Prize 3 Customization */}
-              <div className="space-y-2">
-                <div className="flex flex-col sm:flex-row justify-between gap-1 sm:items-center">
-                  <span className="text-[11px] font-sans text-slate-300 flex items-center gap-1.5 font-bold">
-                    <span>🥉</span>
-                    <span>{lang === 'km' ? 'រង្វាន់ទី ៣' : 'Prize 3'} ({prizes[3]?.title || '...'})</span>
-                  </span>
-                  <span className="text-[10px] text-orange-500 font-mono font-bold">Zoom: {Math.round(prize3Scale * 100)}%</span>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] text-slate-500 font-mono shrink-0">Color</span>
-                    <input
-                      type="color"
-                      value={prize3Color || '#94A3B8'}
-                      onChange={(e) => setPrize3Color(e.target.value)}
-                      className="w-[#60px] bg-[#18181A] border border-white/5 rounded h-8 cursor-pointer p-0"
-                    />
-                    <button
-                      onClick={() => setPrize3Color('')}
-                      className="text-[10px] bg-white/5 hover:bg-white/10 px-2 py-1 rounded transition text-slate-400 cursor-pointer"
-                    >Reset</button>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="range"
-                      min="0.5"
-                      max="2.5"
-                      step="0.05"
-                      value={prize3Scale}
-                      onChange={(e) => setPrize3Scale(parseFloat(e.target.value))}
-                      className="w-full accent-orange-500 cursor-ew-resize h-1 bg-white/10 rounded-lg appearance-none"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* 5. ADD CUSTOM LABELS / TEXT LAYERS */}
-            <div className="space-y-4 bg-[#111112] p-3.5 rounded-xl border border-white/5">
+          {/* 5. ADD CUSTOM LABELS / TEXT LAYERS */}
+          <div className="space-y-4 bg-[#111112] p-3.5 rounded-xl border border-white/5">
               <div className="flex items-center justify-between border-b border-white/5 pb-2">
                 <span className="text-xs font-sans text-slate-300 font-bold flex items-center gap-1">
                   <Plus className="w-3.5 h-3.5 text-orange-500" />
@@ -3000,7 +3003,6 @@ export default function PosterGenerator({
                 </div>
               )}
             </div>
-          </div>
 
           <div className="bg-[#161618] border border-white/5 p-5 rounded-2xl space-y-4 shadow-xl">
             <div>
