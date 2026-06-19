@@ -7,6 +7,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { audio } from '../utils/audio';
 import confetti from 'canvas-confetti';
 import { Volume2, VolumeX, Shuffle, Trophy } from 'lucide-react';
+import { LanguageCode, translations } from '../utils/translations';
 
 interface SpinWheelProps {
   names: string[];
@@ -14,6 +15,7 @@ interface SpinWheelProps {
   onSpinStart: () => void;
   onSpinComplete: (winnerName: string) => void;
   spinDuration?: number; // in seconds
+  lang?: LanguageCode;
 }
 
 export default function SpinWheel({
@@ -22,7 +24,9 @@ export default function SpinWheel({
   onSpinStart,
   onSpinComplete,
   spinDuration = 5,
+  lang = 'km',
 }: SpinWheelProps) {
+  const t = translations[lang];
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isSpinning, setIsSpinning] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
@@ -345,7 +349,7 @@ export default function SpinWheel({
         <button
           onClick={toggleMute}
           className="flex items-center space-x-2 bg-[#161618] backdrop-blur border border-white/5 hover:border-white/10 duration-200 text-slate-300 hover:text-white py-1.5 px-3 rounded-full text-xs font-mono tracking-wider shadow-sm transition cursor-pointer"
-          title={isMuted ? 'បើកសំឡេង' : 'បិទសំឡេង'}
+          title={isMuted ? (lang === 'km' ? 'បើកសំឡេង' : 'Unmute') : (lang === 'km' ? 'បិទសំឡេង' : 'Mute')}
           id="btn-sound-toggle"
         >
           {isMuted ? <VolumeX className="w-3.5 h-3.5 text-rose-400" /> : <Volume2 className="w-3.5 h-3.5 text-orange-450" />}
@@ -383,7 +387,7 @@ export default function SpinWheel({
             style={{ textShadow: '0 1px 2px rgba(0,0,0,0.4)' }}
           >
             <Shuffle className={`w-5 h-5 mb-1 ${isSpinning ? 'animate-spin' : 'animate-bounce'}`} />
-            <span>{isSpinning ? 'កំពុងវិល...' : 'បង្វិល'}</span>
+            <span>{isSpinning ? t.spinning : (lang === 'km' ? 'បង្វិល' : 'SPIN')}</span>
           </button>
         </div>
       </div>
@@ -392,7 +396,7 @@ export default function SpinWheel({
       <div className="text-center">
         <p className="text-slate-400 text-xs sm:text-sm font-sans flex items-center justify-center gap-1.5 bg-[#161618]/60 border border-white/5 py-2 px-4 rounded-xl">
           <Trophy className="w-4 h-4 text-orange-450 animate-pulse" />
-          <span>ចុចលើប៊ូតុង <strong className="text-orange-450">« បង្វិល »</strong> នៅកណ្តាល ដើម្បីចងលទ្ធផលអ្នកឈ្នះ</span>
+          <span>{lang === 'km' ? 'ចុចលើប៊ូតុង « បង្វិល » នៅកណ្តាល ដើម្បីចងលទ្ធផលអ្នកឈ្នះ' : t.spinBtn}</span>
         </p>
       </div>
     </div>

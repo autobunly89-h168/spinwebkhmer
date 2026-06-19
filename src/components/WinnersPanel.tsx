@@ -6,6 +6,7 @@
 import React, { useRef } from 'react';
 import { Winner, Prize } from '../types';
 import { Camera, Trophy, Upload, User, Trash2 } from 'lucide-react';
+import { LanguageCode, translations } from '../utils/translations';
 
 interface WinnersPanelProps {
   winners: Record<number, Winner | null>; // keyed by place (1, 2, 3)
@@ -15,6 +16,7 @@ interface WinnersPanelProps {
   onUpdateWinnerImage: (place: 1 | 2 | 3, base64Image: string) => void;
   onUpdatePrizeTitle: (place: 1 | 2 | 3, title: string) => void;
   onClearWinner: (place: 1 | 2 | 3) => void;
+  lang?: LanguageCode;
 }
 
 export default function WinnersPanel({
@@ -25,7 +27,9 @@ export default function WinnersPanel({
   onUpdateWinnerImage,
   onUpdatePrizeTitle,
   onClearWinner,
+  lang = 'km',
 }: WinnersPanelProps) {
+  const t = translations[lang];
   
   // Create refs for hidden file input triggers to upload winner photos
   const fileInputRefs = {
@@ -52,7 +56,7 @@ export default function WinnersPanel({
     switch (place) {
       case 1:
         return {
-          rankLabel: 'លេខ ១ (Grand Prize)',
+          rankLabel: t.goldPrize,
           medalEmoji: '🥇',
           badgeColor: 'bg-gradient-to-r from-orange-600 via-orange-500 to-amber-550 text-white',
           borderColor: 'border-orange-500/80',
@@ -62,7 +66,7 @@ export default function WinnersPanel({
         };
       case 2:
         return {
-          rankLabel: 'លេខ ២ (Second Place)',
+          rankLabel: t.silverPrize,
           medalEmoji: '🥈',
           badgeColor: 'bg-[#2A2A2E] text-slate-200 border border-white/10',
           borderColor: 'border-slate-500/50',
@@ -72,7 +76,7 @@ export default function WinnersPanel({
         };
       case 3:
         return {
-          rankLabel: 'លេខ ៣ (Third Place)',
+          rankLabel: t.bronzePrize,
           medalEmoji: '🥉',
           badgeColor: 'bg-gradient-to-r from-amber-850 via-amber-750 to-amber-650 text-white',
           borderColor: 'border-amber-700/50',
@@ -119,7 +123,7 @@ export default function WinnersPanel({
             ) : (
               <div className="flex flex-col items-center text-slate-600">
                 <User className="w-10 h-10 mb-1 text-slate-700" />
-                <span className="text-[9px] font-sans text-slate-500">គ្មានរូបភាព</span>
+                <span className="text-[9px] font-sans text-slate-500">{lang === 'km' ? 'គ្មានរូបភាព' : 'No Image'}</span>
               </div>
             )}
 
@@ -127,11 +131,11 @@ export default function WinnersPanel({
             <button
               onClick={() => fileInputRefs[place].current?.click()}
               className="absolute inset-0 bg-[#0A0A0B]/90 opacity-0 group-hover/avatar:opacity-100 flex flex-col items-center justify-center text-white text-[10px] transition-opacity duration-200 cursor-pointer"
-              title="បញ្ចូលរូបភាពអ្នកឈ្នះ"
+              title={lang === 'km' ? 'បញ្ចូលរូបភាពអ្នកឈ្នះ' : 'Upload winner avatar'}
               id={`btn-upload-avatar-${place}`}
             >
               <Camera className="w-5 h-5 mb-1 text-orange-450" />
-              <span>បញ្ចូលរូប</span>
+              <span>{lang === 'km' ? 'បញ្ចូលរូប' : 'Upload'}</span>
             </button>
           </div>
 
@@ -150,7 +154,7 @@ export default function WinnersPanel({
             className="mt-2.5 text-[10px] font-sans text-slate-400 hover:text-orange-450 flex items-center gap-1 bg-[#1E1E21] py-1 px-2.5 rounded-md hover:bg-[#2A2A2E] border border-white/5 transition"
           >
             <Upload className="w-3 h-3" />
-            <span>បញ្ចូលរូបថត</span>
+            <span>{t.uploadPhoto}</span>
           </button>
         </div>
 
@@ -173,7 +177,7 @@ export default function WinnersPanel({
                 <button
                   onClick={() => onClearWinner(place)}
                   className="p-1 text-slate-500 hover:text-rose-400 bg-[#1E1E21] hover:bg-rose-950/40 rounded-md transition opacity-0 group-hover/winner:opacity-100 focus:opacity-100 cursor-pointer"
-                  title="លុបអ្នកឈ្នះ"
+                  title={t.clearWinner}
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
@@ -181,7 +185,7 @@ export default function WinnersPanel({
             ) : (
               <div className="h-9 flex items-center justify-center md:justify-start">
                 <span className="text-slate-500 text-sm font-sans italic animate-pulse">
-                  - រង់ចាំការបង្វិល -
+                  - {t.waitingForSpin} -
                 </span>
               </div>
             )}
@@ -190,14 +194,14 @@ export default function WinnersPanel({
           {/* Prize Config input line */}
           <div className="bg-[#0A0A0B]/80 p-2.5 rounded-xl border border-white/5">
             <label className="block text-[10px] uppercase tracking-wider font-mono text-slate-500 mb-1">
-              🎉 កំណត់រង្វាន់សម្រាប់អ្នកឈ្នះ៖
+              {lang === 'km' ? '🎉 កំណត់រង្វាន់សម្រាប់អ្នកឈ្នះ៖' : '🎉 Set Winner Prize Name:'}
             </label>
             <input
               type="text"
               value={prize.title}
               onChange={(e) => onUpdatePrizeTitle(place, e.target.value)}
               className="w-full bg-[#161618] border border-white/5 rounded-lg px-2.5 py-1.5 text-xs text-orange-450 font-sans focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 placeholder-slate-700 transition"
-              placeholder="ឧទاهرណ៍៖ អាវកីឡា/លុយរង្វាន់..."
+              placeholder={lang === 'km' ? 'ឧទاهرណ៍៖ អាវកីឡា/លុយរង្វាន់...' : 'e.g. Jersey, Tech, Prize cash...'}
               id={`prize-input-${place}`}
             />
           </div>
@@ -215,7 +219,7 @@ export default function WinnersPanel({
             id={`btn-target-${place}`}
           >
             <Trophy className="w-4 h-4" />
-            <span>ចងឈ្នះរង្វាន់នេះ</span>
+            <span>{lang === 'km' ? 'ចង់បង្វិលរង្វាន់នេះ' : 'Select Target'}</span>
           </button>
         </div>
       </div>
@@ -227,7 +231,7 @@ export default function WinnersPanel({
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-white/5 pb-3 gap-2">
         <h2 className="text-lg font-bold font-sans text-white flex items-center gap-2">
           <span className="text-orange-500">🔥</span> 
-          <span>តារាងអ្នកឈ្នះរង្វាន់ទាំង ៣ នាក់</span>
+          <span>{t.winnersTitle}</span>
         </h2>
         <span className="text-slate-500 text-xs font-mono bg-[#161618] py-1 px-2.5 rounded-md border border-white/5">
           SPIN ONCE FOR EACH SLOT

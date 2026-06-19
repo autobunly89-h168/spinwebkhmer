@@ -8,6 +8,7 @@ import { Participant, Prize, Winner, AppSettings } from './types';
 import SpinWheel from './components/SpinWheel';
 import WinnersPanel from './components/WinnersPanel';
 import PosterGenerator from './components/PosterGenerator';
+import { LanguageCode, LANGUAGES, translations } from './utils/translations';
 import { 
   Users, 
   Settings, 
@@ -52,6 +53,18 @@ const INITIAL_NAMES_PRESET = [
 ];
 
 export default function App() {
+  // State 0: Selected language
+  const [lang, setLang] = useState<LanguageCode>(() => {
+    try {
+      const cached = localStorage.getItem('lucky_draw_lang');
+      if (cached && (cached === 'km' || cached === 'en' || cached === 'zh')) {
+        return cached as LanguageCode;
+      }
+    } catch (e) {}
+    return 'km';
+  });
+  const t = translations[lang];
+
   // State 1: Active list of names in the wheel
   const [namesText, setNamesText] = useState<string>('');
   const [namesList, setNamesList] = useState<string[]>([]);
@@ -86,6 +99,15 @@ export default function App() {
   });
 
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'info' | 'warn' } | null>(null);
+
+  // Sync selected language to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem('lucky_draw_lang', lang);
+    } catch (e) {
+      console.error(e);
+    }
+  }, [lang]);
 
   // Initialize and load state from localStorage (durable client data persistence)
   useEffect(() => {
@@ -344,11 +366,10 @@ export default function App() {
             </div>
             <div>
               <h1 className="text-lg font-bold font-sans tracking-wide text-white flex items-center gap-1.5 leading-none mb-1">
-                <span>កង់បង្វិលផ្សងសំណាង</span>
-                <span className="text-orange-500">LUCKY SPIN</span>
+                <span>{t.title}</span>
               </h1>
-              <p className="text-[10px] text-slate-500 font-mono tracking-widest uppercase">
-                Khmer Sports & Giveaway Tournament System
+              <p className="text-[10px] text-slate-500 font-mono tracking-wider uppercase">
+                {t.subtitle}
               </p>
             </div>
           </div>
@@ -356,6 +377,22 @@ export default function App() {
           {/* Quick Stats & Controls header bar */}
           <div className="flex flex-wrap items-center gap-3">
             
+            {/* Language Selector Dropdown */}
+            <div className="flex items-center gap-1.5 bg-[#161618] border border-white/5 py-1.5 px-3 rounded-xl text-xs text-slate-350">
+              <span className="text-xs">🌐</span>
+              <select
+                value={lang}
+                onChange={(e) => setLang(e.target.value as LanguageCode)}
+                className="bg-transparent border-none text-[#f8fafc] text-xs font-sans font-medium focus:outline-none focus:ring-0 cursor-pointer"
+              >
+                {LANGUAGES.map((l) => (
+                  <option key={l.code} value={l.code} className="bg-[#161618] text-slate-200">
+                    {l.flag} {l.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             {/* Logo Uploading field (upland logo point) */}
             <div className="flex items-center gap-2 bg-[#161618] border border-white/5 py-1.5 px-3 rounded-xl">
               {logo ? (
@@ -363,22 +400,26 @@ export default function App() {
                   <div className="w-5 h-5 rounded-full overflow-hidden border border-orange-500">
                     <img src={logo} className="w-full h-full object-cover" alt="Custom Logo" referrerPolicy="no-referrer" />
                   </div>
-                  <span className="text-[11px] font-sans text-slate-300">Logo បញ្ចូលរួច</span>
-                  <button onClick={handleRemoveLogo} className="text-[10px] text-rose-400 hover:underline hover:text-rose-300 cursor-pointer" title="Remove custom organization logo">
-                    លុប
+                  <span className="text-[11px] font-sans text-slate-300">
+                    {lang === 'km' ? 'Logo បញ្ចូលរួច' : lang === 'zh' ? 'Logo 已载入' : 'Logo Loaded'}
+                  </span>
+                  <button onClick={handleRemoveLogo} className="text-[10px] text-rose-450 hover:underline hover:text-rose-400 cursor-pointer" title="Remove custom organization logo">
+                    {lang === 'km' ? 'លុប' : lang === 'zh' ? '删除' : 'Remove'}
                   </button>
                 </div>
               ) : (
                 <label className="flex items-center gap-1.5 text-[11px] text-slate-400 hover:text-orange-450 cursor-pointer transition">
                   <Upload className="w-3.5 h-3.5" />
-                  <span>បញ្ចូល Logo ក្រុមហ៊ុន</span>
+                  <span>
+                    {lang === 'km' ? 'បញ្ចូល Logo ក្រុមហ៊ុន' : lang === 'zh' ? '上传企业图标 / Logo' : 'Upload Logo'}
+                  </span>
                   <input type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
                 </label>
               )}
             </div>
 
             <div className="text-xs font-mono text-slate-400 bg-[#161618] border border-white/5 px-3 py-1.5 rounded-xl">
-              អ្នកចូលរួម៖ <strong className="text-orange-500">{namesList.length} នាក់</strong>
+              {lang === 'km' ? 'អ្នកចូលរួម៖' : lang === 'zh' ? '参与者:' : 'Participants:'} <strong className="text-orange-500">{namesList.length} {lang === 'km' ? 'នាក់' : lang === 'zh' ? '人' : 'people'}</strong>
             </div>
 
             {/* Clear all state to restart layout */}
@@ -386,10 +427,10 @@ export default function App() {
               onClick={handleResetFullDraw}
               className="flex items-center gap-1 bg-[#161618] hover:bg-[#202023] text-rose-450 hover:text-rose-400 text-xs py-1.5 px-3 rounded-xl border border-white/5 cursor-pointer transition duration-150"
               id="btn-global-reset"
-              title="សំអាតអ្នកឈ្នះ"
+              title={lang === 'km' ? 'សំអាតអ្នកឈ្នះ' : t.resetAll}
             >
               <RotateCcw className="w-3.5 h-3.5" />
-              <span>លុបលទ្ធផល</span>
+              <span>{lang === 'km' ? 'លុបលទ្ធផល' : t.resetAll}</span>
             </button>
           </div>
 
@@ -460,10 +501,11 @@ export default function App() {
 
             {/* SPIN WHEEL CANVAS DRAW STAGE */}
             <SpinWheel
+              lang={lang}
               names={namesList}
               logo={logo}
               onSpinStart={() => {
-                showNotification('កំពុងបង្វិលកង់សំណាង... សូមរង់ចាំលទ្ធផល!', 'info');
+                showNotification(lang === 'km' ? 'កំពុងបង្វិលកង់សំណាង... សូមរង់ចាំលទ្ធផល!' : lang === 'zh' ? '幸运转盘旋转中...请稍候!' : 'Spinning the lucky wheel... please wait!', 'info');
               }}
               onSpinComplete={handleWheelSpinComplete}
               spinDuration={settings.spinDuration}
@@ -640,6 +682,7 @@ export default function App() {
         {/* ROW 2: DETAILED WINNERS TILES (Gold, Silver, Bronze) */}
         <div className="bg-[#161618]/30 border border-white/5 p-6 rounded-3xl shadow-[0_10px_30px_rgba(0,0,0,0.5)]" id="winners-dashboard-section">
           <WinnersPanel
+            lang={lang}
             winners={winners}
             prizes={prizes}
             activeDrawPlace={activeDrawPlace}
@@ -653,6 +696,7 @@ export default function App() {
         {/* ROW 3: ANNOUNCEMENT POSTER & EXPORTER */}
         <div className="bg-[#161618]/30 border border-white/5 p-6 rounded-3xl shadow-[0_10px_30px_rgba(0,0,0,0.5)]" id="export-poster-section">
           <PosterGenerator
+            lang={lang}
             winners={winners}
             prizes={prizes}
             settings={settings}

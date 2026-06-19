@@ -6,13 +6,15 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Winner, Prize, AppSettings } from '../types';
 import { jsPDF } from 'jspdf';
-import { Download, FileDown, Image as ImageIcon, CheckCircle, RefreshCw, Move, RotateCcw, Sliders, Crop, Palette, Sparkles } from 'lucide-react';
+import { Download, FileDown, Image as ImageIcon, CheckCircle, RefreshCw, Move, RotateCcw, Sliders, Crop, Palette, Sparkles, Plus, Trash2, Bold, Type, Upload, ChevronRight, Layers, Bookmark, Trophy, Eye, EyeOff, PlusCircle, Check, Gift } from 'lucide-react';
+import { LanguageCode, translations } from '../utils/translations';
 
 interface PosterGeneratorProps {
   winners: Record<number, Winner | null>;
   prizes: Record<number, Prize>;
   settings: AppSettings;
   logo?: string;
+  lang?: LanguageCode;
 }
 
 // Helper to convert hex to RGBA with specific opacity
@@ -134,6 +136,60 @@ const BACKGROUND_PRESETS = [
     isDark: true
   },
   {
+    id: 'football-turf',
+    name: 'តារាងបាល់ទាត់ និងកីឡា',
+    enName: 'Football Pitch Arena',
+    desc: 'ផ្ទៃខាងក្រោយវាលស្មៅបៃតង គំនូសបន្ទាត់តារាងបាល់ទាត់ និងពន្លឺភ្លើងកីឡាប្រណីត',
+    gradient: 'from-[#14532D] via-[#166534] to-[#052E16]',
+    badgeColor: '#22C55E',
+    isDark: true
+  },
+  {
+    id: 'gaming-cyber',
+    name: 'ណេអុងហ្គេមបាញ់គ្នា',
+    enName: 'Pro Cyber E-Sports',
+    desc: 'ក្តារហ្គេមបច្ចេកវិទ្យាណេអុងខៀវស្រងាត់ រួមជាមួយរ៉ាដាកម្រិតខ្ពស់ និងគ្រោង Cyber',
+    gradient: 'from-[#020617] via-[#0F172A] to-[#040D21]',
+    badgeColor: '#06B6D4',
+    isDark: true
+  },
+  {
+    id: 'casino-slots',
+    name: 'កាស៊ីណូរ៉ូយ៉ាល់មាសក្រហម',
+    enName: 'Casino Vegas Slots',
+    desc: 'ពណ៌ក្រហមវល្លិ៍ប្រណីត បញ្ចូលពន្លឺចាំងផ្លេក ផ្កាភ្លើង និងការកំណត់សំណាង Vegas',
+    gradient: 'from-[#7F1D1D] via-[#991B1B] to-[#450A0A]',
+    badgeColor: '#EF4444',
+    isDark: true
+  },
+  {
+    id: 'entertainment-glow',
+    name: 'ឆាកកំសាន្ត និងតន្ត្រីញាក់',
+    enName: 'Vibrant Concert Lights',
+    desc: 'ពន្លឺភ្លើងតាមឆាកមហោស្រព ពណ៌ស្វាយផ្កាឈូក រំញ័រតន្ត្រីកំសាន្តពេញទំហឹង',
+    gradient: 'from-[#2E1065] via-[#3B0764] to-[#1E1B4B]',
+    badgeColor: '#EC4899',
+    isDark: true
+  },
+  {
+    id: 'corporate-pro',
+    name: 'ក្រុមហ៊ុន និងសមាគមអាជីវកម្ម',
+    enName: 'Official Corporate Grid',
+    desc: 'ពណ៌ខៀវក្រម៉ៅសោភណភាពស្អាតបាត ស័ក្តិសមសម្រាប់ក្រុមហ៊ុន ឬស្ថាប័នផ្លូវការ',
+    gradient: 'from-[#0A1931] via-[#15305B] to-[#050C1A]',
+    badgeColor: '#3B82F6',
+    isDark: true
+  },
+  {
+    id: 'retail-boutique',
+    name: 'ហាងលក់ទំនិញ និងហាងកាហ្វេ',
+    enName: 'Cozy Retail Store Amber',
+    desc: 'ពណ៌លឿងទុំចាំងៗ កក់ក្តៅ បែបទាន់សម័យ សម្រាប់កាហ្វេដី ឬហាងអាជីវកម្មទំនើប',
+    gradient: 'from-[#7C2D12] via-[#F97316] to-[#431407]',
+    badgeColor: '#F59E0B',
+    isDark: true
+  },
+  {
     id: 'organic-waves',
     name: 'រលកធម្មជាតិខ្ពស់',
     enName: 'Organic Scandinavian',
@@ -167,10 +223,71 @@ export default function PosterGenerator({
   prizes,
   settings,
   logo,
+  lang = 'km',
 }: PosterGeneratorProps) {
+  const t = translations[lang];
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isPlayingSuccessAnim, setIsPlayingSuccessAnim] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string>('');
+  
+  // Custom Text Customizations (Zoom sizes & Custom Content)
+  const [headerText, setHeaderText] = useState<string>('');
+  const [mainTitleText, setMainTitleText] = useState<string>('GIVEAWAY');
+  const [subTitleText, setSubTitleText] = useState<string>('🏆 WINNERS 🏆');
+  const [congratsText, setCongratsText] = useState<string>('');
+
+  // Sizing scale / zoom factors
+  const [headerScale, setHeaderScale] = useState<number>(1.0);
+  const [mainTitleScale, setMainTitleScale] = useState<number>(1.0);
+  const [subTitleScale, setSubTitleScale] = useState<number>(1.0);
+  const [congratsScale, setCongratsScale] = useState<number>(1.0);
+
+  // Custom Colors
+  const [headerColor, setHeaderColor] = useState<string>('');
+  const [isMainTitleGradient, setIsMainTitleGradient] = useState<boolean>(true);
+  const [mainTitleColor1, setMainTitleColor1] = useState<string>('#FFFFFF');
+  const [mainTitleColor2, setMainTitleColor2] = useState<string>('#FFF2CD');
+  const [subTitleColor, setSubTitleColor] = useState<string>('');
+  const [congratsColor, setCongratsColor] = useState<string>('');
+
+  // Advanced Gradient Text Color mixing expansions
+  const [isHeaderGradient, setIsHeaderGradient] = useState<boolean>(false);
+  const [headerColor2, setHeaderColor2] = useState<string>('#94A3B8');
+  const [isCongratsGradient, setIsCongratsGradient] = useState<boolean>(false);
+  const [congratsColor2, setCongratsColor2] = useState<string>('#94A3B8');
+
+  // Layer Visibility Toggles (ស្រទាប់ទាំងបង្អស់)
+  const [showLayerLogo, setShowLayerLogo] = useState<boolean>(true);
+  const [showLayerHeader, setShowLayerHeader] = useState<boolean>(true);
+  const [showLayerMainTitle, setShowLayerMainTitle] = useState<boolean>(true);
+  const [showLayerRibbon, setShowLayerRibbon] = useState<boolean>(true);
+  const [showLayerWinners, setShowLayerWinners] = useState<boolean>(true);
+  const [showLayerCongrats, setShowLayerCongrats] = useState<boolean>(true);
+
+  // Offset states for drag and adjust
+  const [headerOffsetX, setHeaderOffsetX] = useState<number>(0);
+  const [headerOffsetY, setHeaderOffsetY] = useState<number>(0);
+  const [mainTitleOffsetX, setMainTitleOffsetX] = useState<number>(0);
+  const [mainTitleOffsetY, setMainTitleOffsetY] = useState<number>(0);
+  const [subTitleOffsetX, setSubTitleOffsetX] = useState<number>(0);
+  const [subTitleOffsetY, setSubTitleOffsetY] = useState<number>(0);
+  const [winnersOffsetX, setWinnersOffsetX] = useState<number>(0);
+  const [winnersOffsetY, setWinnersOffsetY] = useState<number>(0);
+  const [congratsOffsetX, setCongratsOffsetX] = useState<number>(0);
+  const [congratsOffsetY, setCongratsOffsetY] = useState<number>(0);
+
+  // Which layer is selected as active for mouse/touch/arrow-key dragging ('logo', 'header', 'main-title', 'sub-title', 'winners', 'congrats')
+  const [activeDraggableLayer, setActiveDraggableLayer] = useState<string>('logo');
+
+  // Active highlighted expanded layer ID ('background', 'logo', 'header', 'main-title', 'ribbon', 'winners', 'congrats', 'extra')
+  const [activeLayer, setActiveLayer] = useState<string>('main-title');
+
+  // Extra custom texts adding state
+  const [extraTexts, setExtraTexts] = useState<any[]>([]);
+
+  // User-uploaded custom background state
+  const [customBgImage, setCustomBgImage] = useState<string>('');
+  const cachedCustomBgImg = useRef<HTMLImageElement | null>(null);
   
   // Orientation template state: 'portrait' (ឈរ) or 'landscape' (ដេក)
   const [orientation, setOrientation] = useState<'portrait' | 'landscape'>('portrait');
@@ -184,6 +301,14 @@ export default function PosterGenerator({
   const [logoOffsetY, setLogoOffsetY] = useState<number>(0);
   const [logoUseOriginalShape, setLogoUseOriginalShape] = useState<boolean>(true);
 
+  // Prizes color and zoom (scale) customization
+  const [prize1Scale, setPrize1Scale] = useState<number>(1.0);
+  const [prize2Scale, setPrize2Scale] = useState<number>(1.0);
+  const [prize3Scale, setPrize3Scale] = useState<number>(1.0);
+  const [prize1Color, setPrize1Color] = useState<string>('');
+  const [prize2Color, setPrize2Color] = useState<string>('');
+  const [prize3Color, setPrize3Color] = useState<string>('');
+
   // Drag interaction states
   const [isDragging, setIsDragging] = useState(false);
   const dragStartPos = useRef({ x: 0, y: 0 });
@@ -193,6 +318,14 @@ export default function PosterGenerator({
   const cachedLogoImg = useRef<HTMLImageElement | null>(null);
   const cachedAvatars = useRef<Record<number, HTMLImageElement | null>>({ 1: null, 2: null, 3: null });
   const [imagesLoadedToggle, setImagesLoadedToggle] = useState<boolean>(false);
+
+  // Synchronise default values whenever lang, t, or selected language changes
+  useEffect(() => {
+    setHeaderText(t.welcomeText);
+    setMainTitleText(t.mainText);
+    setSubTitleText(t.subText);
+    setCongratsText(t.congratsText);
+  }, [lang]);
 
   // 1. CACHE LOGO IMAGE & DETECT ACCENT COLOR ONCE
   useEffect(() => {
@@ -224,6 +357,33 @@ export default function PosterGenerator({
       isCurrent = false;
     };
   }, [logo]);
+
+  // 1.5 CACHE USER BACKGROUND IMAGE ONCE OCCURS
+  useEffect(() => {
+    let isCurrent = true;
+    if (customBgImage) {
+      preloadImage(customBgImage)
+        .then((img) => {
+          if (isCurrent) {
+            cachedCustomBgImg.current = img;
+            setImagesLoadedToggle(prev => !prev);
+          }
+         })
+        .catch((e) => {
+          console.warn("Custom background image failure cache load", e);
+          if (isCurrent) {
+            cachedCustomBgImg.current = null;
+            setImagesLoadedToggle(prev => !prev);
+          }
+        });
+    } else {
+      cachedCustomBgImg.current = null;
+      setImagesLoadedToggle(prev => !prev);
+    }
+    return () => {
+      isCurrent = false;
+    };
+  }, [customBgImage]);
 
   // 2. CACHE WINNER AVATARS ONCE
   useEffect(() => {
@@ -260,11 +420,39 @@ export default function PosterGenerator({
 
   // Drag handlers on the preview wrapper
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!logo) return;
     e.preventDefault();
     setIsDragging(true);
     dragStartPos.current = { x: e.clientX, y: e.clientY };
-    dragStartOffset.current = { x: logoOffsetX, y: logoOffsetY };
+
+    let currentX = 0;
+    let currentY = 0;
+    switch (activeDraggableLayer) {
+      case 'logo':
+        currentX = logoOffsetX;
+        currentY = logoOffsetY;
+        break;
+      case 'header':
+        currentX = headerOffsetX;
+        currentY = headerOffsetY;
+        break;
+      case 'main-title':
+        currentX = mainTitleOffsetX;
+        currentY = mainTitleOffsetY;
+        break;
+      case 'sub-title':
+        currentX = subTitleOffsetX;
+        currentY = subTitleOffsetY;
+        break;
+      case 'winners':
+        currentX = winnersOffsetX;
+        currentY = winnersOffsetY;
+        break;
+      case 'congrats':
+        currentX = congratsOffsetX;
+        currentY = congratsOffsetY;
+        break;
+    }
+    dragStartOffset.current = { x: currentX, y: currentY };
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -276,8 +464,35 @@ export default function PosterGenerator({
     const canvasWidth = orientation === 'portrait' ? 800 : 1000;
     const ratio = canvasWidth / rect.width;
 
-    setLogoOffsetX(dragStartOffset.current.x + dx * ratio);
-    setLogoOffsetY(dragStartOffset.current.y + dy * ratio);
+    const targetX = dragStartOffset.current.x + dx * ratio;
+    const targetY = dragStartOffset.current.y + dy * ratio;
+
+    switch (activeDraggableLayer) {
+      case 'logo':
+        setLogoOffsetX(targetX);
+        setLogoOffsetY(targetY);
+        break;
+      case 'header':
+        setHeaderOffsetX(targetX);
+        setHeaderOffsetY(targetY);
+        break;
+      case 'main-title':
+        setMainTitleOffsetX(targetX);
+        setMainTitleOffsetY(targetY);
+        break;
+      case 'sub-title':
+        setSubTitleOffsetX(targetX);
+        setSubTitleOffsetY(targetY);
+        break;
+      case 'winners':
+        setWinnersOffsetX(targetX);
+        setWinnersOffsetY(targetY);
+        break;
+      case 'congrats':
+        setCongratsOffsetX(targetX);
+        setCongratsOffsetY(targetY);
+        break;
+    }
   };
 
   const handleMouseUpOrLeave = () => {
@@ -285,11 +500,40 @@ export default function PosterGenerator({
   };
 
   const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
-    if (!logo || e.touches.length === 0) return;
+    if (e.touches.length === 0) return;
     setIsDragging(true);
     const touch = e.touches[0];
     dragStartPos.current = { x: touch.clientX, y: touch.clientY };
-    dragStartOffset.current = { x: logoOffsetX, y: logoOffsetY };
+
+    let currentX = 0;
+    let currentY = 0;
+    switch (activeDraggableLayer) {
+      case 'logo':
+        currentX = logoOffsetX;
+        currentY = logoOffsetY;
+        break;
+      case 'header':
+        currentX = headerOffsetX;
+        currentY = headerOffsetY;
+        break;
+      case 'main-title':
+        currentX = mainTitleOffsetX;
+        currentY = mainTitleOffsetY;
+        break;
+      case 'sub-title':
+        currentX = subTitleOffsetX;
+        currentY = subTitleOffsetY;
+        break;
+      case 'winners':
+        currentX = winnersOffsetX;
+        currentY = winnersOffsetY;
+        break;
+      case 'congrats':
+        currentX = congratsOffsetX;
+        currentY = congratsOffsetY;
+        break;
+    }
+    dragStartOffset.current = { x: currentX, y: currentY };
   };
 
   const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
@@ -302,8 +546,35 @@ export default function PosterGenerator({
     const canvasWidth = orientation === 'portrait' ? 800 : 1000;
     const ratio = canvasWidth / rect.width;
 
-    setLogoOffsetX(dragStartOffset.current.x + dx * ratio);
-    setLogoOffsetY(dragStartOffset.current.y + dy * ratio);
+    const targetX = dragStartOffset.current.x + dx * ratio;
+    const targetY = dragStartOffset.current.y + dy * ratio;
+
+    switch (activeDraggableLayer) {
+      case 'logo':
+        setLogoOffsetX(targetX);
+        setLogoOffsetY(targetY);
+        break;
+      case 'header':
+        setHeaderOffsetX(targetX);
+        setHeaderOffsetY(targetY);
+        break;
+      case 'main-title':
+        setMainTitleOffsetX(targetX);
+        setMainTitleOffsetY(targetY);
+        break;
+      case 'sub-title':
+        setSubTitleOffsetX(targetX);
+        setSubTitleOffsetY(targetY);
+        break;
+      case 'winners':
+        setWinnersOffsetX(targetX);
+        setWinnersOffsetY(targetY);
+        break;
+      case 'congrats':
+        setCongratsOffsetX(targetX);
+        setCongratsOffsetY(targetY);
+        break;
+    }
   };
 
   const handleTouchEnd = () => {
@@ -338,7 +609,45 @@ export default function PosterGenerator({
     logoOffsetY, 
     logoUseOriginalShape, 
     imagesLoadedToggle,
-    bgPreset
+    bgPreset,
+    headerText,
+    mainTitleText,
+    subTitleText,
+    congratsText,
+    headerScale,
+    mainTitleScale,
+    subTitleScale,
+    congratsScale,
+    headerColor,
+    isMainTitleGradient,
+    mainTitleColor1,
+    mainTitleColor2,
+    subTitleColor,
+    congratsColor,
+    extraTexts,
+    customBgImage,
+    prize1Scale,
+    prize2Scale,
+    prize3Scale,
+    prize1Color,
+    prize2Color,
+    prize3Color,
+    showLayerLogo,
+    showLayerHeader,
+    showLayerMainTitle,
+    showLayerRibbon,
+    showLayerWinners,
+    showLayerCongrats,
+    headerOffsetX,
+    headerOffsetY,
+    mainTitleOffsetX,
+    mainTitleOffsetY,
+    subTitleOffsetX,
+    subTitleOffsetY,
+    winnersOffsetX,
+    winnersOffsetY,
+    congratsOffsetX,
+    congratsOffsetY
   ]);
 
   const generatePosterCode = () => {
@@ -678,10 +987,217 @@ export default function PosterGenerator({
         ctx.arc(px, py, radius, 0, Math.PI * 2);
         ctx.fill();
       }
+    } else if (bgPreset === 'football-turf') {
+      const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
+      bgGrad.addColorStop(0, '#14532D'); 
+      bgGrad.addColorStop(0.5, '#166534'); 
+      bgGrad.addColorStop(1, '#052E16'); 
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(0, height / 2);
+      ctx.lineTo(width, height / 2);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(width / 2, height / 2, 120, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.roundRect(width / 2 - 180, 0, 360, 100, [0, 0, 40, 40]);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.roundRect(width / 2 - 180, height - 100, 360, 100, [40, 40, 0, 0]);
+      ctx.stroke();
+
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.02)';
+      for (let i = 0; i < 4; i++) {
+        ctx.beginPath();
+        ctx.moveTo(i * 180, 0);
+        ctx.lineTo(i * 180 + 250, height);
+        ctx.lineTo(i * 180 - 250, height);
+        ctx.closePath();
+        ctx.fill();
+      }
+    } else if (bgPreset === 'gaming-cyber') {
+      const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
+      bgGrad.addColorStop(0, '#020617'); 
+      bgGrad.addColorStop(0.5, '#0F172A'); 
+      bgGrad.addColorStop(1, '#040D21'); 
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.strokeStyle = 'rgba(6, 182, 212, 0.1)'; 
+      ctx.lineWidth = 1;
+      const step = 45;
+      for (let x = 0; x < width; x += step) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, height);
+        ctx.stroke();
+      }
+      for (let y = 0; y < height; y += step) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(width, y);
+        ctx.stroke();
+      }
+
+      ctx.strokeStyle = 'rgba(168, 85, 247, 0.15)'; 
+      ctx.beginPath();
+      ctx.arc(width / 2, height / 2, 200, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(width / 2, height / 2, 100, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(width / 2 - 250, height / 2);
+      ctx.lineTo(width / 2 + 250, height / 2);
+      ctx.moveTo(width / 2, height / 2 - 250);
+      ctx.lineTo(width / 2, height / 2 + 250);
+      ctx.stroke();
+    } else if (bgPreset === 'casino-slots') {
+      const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
+      bgGrad.addColorStop(0, '#7F1D1D'); 
+      bgGrad.addColorStop(0.5, '#991B1B'); 
+      bgGrad.addColorStop(1, '#450A0A'); 
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.strokeStyle = 'rgba(234, 179, 8, 0.04)';
+      ctx.lineWidth = 15;
+      for (let i = 0; i < 36; i++) {
+        const angle = (i * Math.PI) / 18;
+        ctx.beginPath();
+        ctx.moveTo(width / 2, height / 2);
+        ctx.lineTo(width / 2 + Math.cos(angle) * width * 1.5, height / 2 + Math.sin(angle) * height * 1.5);
+        ctx.stroke();
+      }
+
+      ctx.fillStyle = 'rgba(234, 179, 8, 0.15)';
+      for (let i = 0; i < 20; i++) {
+        ctx.beginPath();
+        ctx.arc(30 + i * (width / 20), 30, 4, 0, Math.PI * 2);
+        ctx.arc(30 + i * (width / 20), height - 30, 4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    } else if (bgPreset === 'entertainment-glow') {
+      const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
+      bgGrad.addColorStop(0, '#2E1065'); 
+      bgGrad.addColorStop(0.5, '#3B0764'); 
+      bgGrad.addColorStop(1, '#1E1B4B'); 
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.fillStyle = 'rgba(236, 72, 153, 0.06)'; 
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(width * 0.7, height);
+      ctx.lineTo(width * 0.3, height);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = 'rgba(168, 85, 247, 0.06)'; 
+      ctx.beginPath();
+      ctx.moveTo(width, 0);
+      ctx.lineTo(width * 0.8, height);
+      ctx.lineTo(width * 0.4, height);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.strokeStyle = 'rgba(236, 72, 153, 0.1)';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      for (let x = 0; x <= width; x += 35) {
+        const barH = 40 + Math.sin(x * 0.06) * 25;
+        ctx.moveTo(x, height);
+        ctx.lineTo(x, height - barH);
+      }
+      ctx.stroke();
+    } else if (bgPreset === 'corporate-pro') {
+      const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
+      bgGrad.addColorStop(0, '#0A1931'); 
+      bgGrad.addColorStop(0.5, '#15305B'); 
+      bgGrad.addColorStop(1, '#050C1A'); 
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.strokeStyle = 'rgba(59, 130, 246, 0.06)';
+      ctx.lineWidth = 1;
+      for (let x = 0; x < width; x += 50) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, height);
+        ctx.stroke();
+      }
+      for (let y = 0; y < height; y += 50) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(width, y);
+        ctx.stroke();
+      }
+
+      ctx.strokeStyle = 'rgba(59, 130, 246, 0.15)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(50, 50);
+      ctx.lineTo(200, 50);
+      ctx.moveTo(width - 50, height - 50);
+      ctx.lineTo(width - 200, height - 50);
+      ctx.stroke();
+    } else if (bgPreset === 'retail-boutique') {
+      const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
+      bgGrad.addColorStop(0, '#7C2D12'); 
+      bgGrad.addColorStop(0.6, '#F97316'); 
+      bgGrad.addColorStop(1, '#431407'); 
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.strokeStyle = 'rgba(251, 191, 36, 0.2)';
+      ctx.lineWidth = 1.25;
+      ctx.beginPath();
+      ctx.arc(width / 3, -50, 150, 0, Math.PI);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc((width / 3) * 2, -50, 150, 0, Math.PI);
+      ctx.stroke();
+
+      ctx.fillStyle = '#FBBF24';
+      ctx.shadowBlur = 8;
+      ctx.shadowColor = '#FBBF24';
+      const bulbXs = [width / 6, width / 3, width / 2, (width * 2) / 3, (width * 5) / 6];
+      bulbXs.forEach(bx => {
+        ctx.beginPath();
+        ctx.arc(bx, 35, 4.5, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.shadowBlur = 0;
+    } else if (bgPreset === 'custom-upload' && cachedCustomBgImg.current) {
+      const bgImg = cachedCustomBgImg.current;
+      const imgRatio = bgImg.width / bgImg.height;
+      const canvasRatio = width / height;
+      let drawW, drawH, drawX, drawY;
+      
+      if (imgRatio > canvasRatio) {
+        drawH = height;
+        drawW = height * imgRatio;
+        drawX = (width - drawW) / 2;
+        drawY = 0;
+      } else {
+        drawW = width;
+        drawH = width / imgRatio;
+        drawX = 0;
+        drawY = (height - drawH) / 2;
+      }
+      ctx.drawImage(bgImg, drawX, drawY, drawW, drawH);
     }
 
-    // 4. DRAW HEADER & LOGO (Drawn at the center)
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+  // 4. DRAW HEADER & LOGO (Drawn at the center)
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
     ctx.shadowBlur = 8;
     
     const headerTitleY = orientation === 'portrait' ? 122 : 100;
@@ -689,7 +1205,7 @@ export default function PosterGenerator({
     const subtitleY = orientation === 'portrait' ? 233 : 202;
 
     // Draw header logo centered above text with dynamic adjustments
-    if (logoImgEl) {
+    if (logoImgEl && showLayerLogo) {
       const origW = logoImgEl.width || 100;
       const origH = logoImgEl.height || 100;
       const aspect = origW / origH;
@@ -757,331 +1273,369 @@ export default function PosterGenerator({
     }
 
     // Secondary Title
-    ctx.fillStyle = textColor;
-    ctx.textAlign = 'center';
-    ctx.font = 'bold 22px "Kantumruy Pro", "Inter", "Noto Sans Khmer", sans-serif';
-    ctx.fillText('អបអរសាទរម្ចាស់រង្វាន់', width / 2, headerTitleY);
+    if (showLayerHeader) {
+      ctx.save();
+      ctx.textAlign = 'center';
+      ctx.font = `bold ${Math.round(22 * headerScale)}px "Kantumruy Pro", "Inter", sans-serif`;
+      
+      const headerX = width / 2 + headerOffsetX;
+      const headerY = headerTitleY + headerOffsetY;
+
+      if (isHeaderGradient) {
+        const headerGrad = ctx.createLinearGradient(headerX, headerY - 15, headerX, headerY + 10);
+        headerGrad.addColorStop(0, headerColor || '#FFFFFF');
+        headerGrad.addColorStop(1, headerColor2 || '#94A3B8');
+        ctx.fillStyle = headerGrad;
+      } else {
+        ctx.fillStyle = headerColor || textColor;
+      }
+      ctx.fillText(headerText || (lang === 'km' ? 'អបអរសាទរម្ចាស់រង្វាន់' : 'Congratulations Winners!'), headerX, headerY);
+      ctx.restore();
+    }
 
     // Giant Dynamic Brand Gradient Title 'GIVEAWAY WINNERS'
-    ctx.shadowBlur = isDark ? 18 : 4;
-    ctx.shadowColor = isDark ? hexToRgba(finalAccent, 0.5) : 'rgba(0, 0, 0, 0.15)';
-    
-    const titleGrad = ctx.createLinearGradient(0, mainTitleY - 45, 0, mainTitleY + 15);
-    if (isDark) {
-      titleGrad.addColorStop(0, '#FFFFFF'); // white gold start
-      titleGrad.addColorStop(0.4, finalAccent); // Dynamic brand centerpiece
-      titleGrad.addColorStop(1, '#FFF2CD'); // gold shine tint
-    } else {
-      titleGrad.addColorStop(0, '#1E293B'); // dark stone gray start
-      titleGrad.addColorStop(0.5, finalAccent); // Brand centerpiece
-      titleGrad.addColorStop(1, '#0F172A'); // deep slate finish
+    if (showLayerMainTitle) {
+      ctx.save();
+      ctx.shadowBlur = isDark ? 18 : 4;
+      ctx.shadowColor = isDark ? hexToRgba(finalAccent, 0.5) : 'rgba(0, 0, 0, 0.15)';
+      
+      const titleX = width / 2 + mainTitleOffsetX;
+      const titleY = mainTitleY + mainTitleOffsetY;
+
+      // Gradient mixer colors
+      if (isMainTitleGradient) {
+        const titleGrad = ctx.createLinearGradient(titleX, titleY - 45, titleX, titleY + 15);
+        titleGrad.addColorStop(0, mainTitleColor1); 
+        titleGrad.addColorStop(1, mainTitleColor2); 
+        ctx.fillStyle = titleGrad;
+      } else {
+        ctx.fillStyle = mainTitleColor1;
+      }
+
+      const baseTitleSize = orientation === 'portrait' ? 68 : 60;
+      ctx.font = `900 ${Math.round(baseTitleSize * mainTitleScale)}px "Space Grotesk", "Kantumruy Pro", sans-serif`;
+      ctx.fillText(mainTitleText || 'GIVEAWAY', titleX, titleY);
+      ctx.restore();
     }
-    ctx.fillStyle = titleGrad;
-    ctx.font = orientation === 'portrait' 
-      ? '900 68px "Space Grotesk", "Kantumruy Pro", sans-serif'
-      : '900 60px "Space Grotesk", "Kantumruy Pro", sans-serif';
-    ctx.fillText('GIVEAWAY', width / 2, mainTitleY);
 
     // Small ribbon sub-header
-    ctx.shadowBlur = isDark ? 4 : 0;
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
-    ctx.fillStyle = accentTextColor;
-    ctx.font = 'italic bold 28px "Kantumruy Pro", "Space Grotesk", sans-serif';
-    ctx.fillText('🏆 WINNERS 🏆', width / 2, subtitleY);
+    if (showLayerRibbon) {
+      ctx.save();
+      ctx.shadowBlur = isDark ? 4 : 0;
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
+      ctx.fillStyle = subTitleColor || accentTextColor;
+      ctx.font = `italic bold ${Math.round(28 * subTitleScale)}px "Kantumruy Pro", "Space Grotesk", sans-serif`;
+      
+      const subX = width / 2 + subTitleOffsetX;
+      const subY = subtitleY + subTitleOffsetY;
+      ctx.fillText(subTitleText || '🏆 WINNERS 🏆', subX, subY);
+      ctx.restore();
+    }
 
     ctx.shadowBlur = 0; // Reset shadow
 
     // 5. DRAW THE 3 WINNERS TABLE
     const places: (1 | 2 | 3)[] = [1, 2, 3];
 
-    if (orientation === 'portrait') {
-      // VERTICAL (PORTRAIT) TEMPLATE - Classic gorgeous stacks
-      const startY = 285;
-      const rowHeight = 175;
+    if (showLayerWinners) {
+      if (orientation === 'portrait') {
+        // VERTICAL (PORTRAIT) TEMPLATE - Classic gorgeous stacks
+        const startY = 285 + winnersOffsetY;
+        const rowHeight = 175;
 
-      places.forEach((place, index) => {
-        const winner = winners[place];
-        const prize = prizes[place];
-        const y = startY + index * rowHeight;
+        places.forEach((place, index) => {
+          const winner = winners[place];
+          const prize = prizes[place];
+          const y = startY + index * rowHeight;
+          const cardX = 100 + winnersOffsetX;
 
-        let curAccent = finalAccent;
-        let rankText = '1st PLACE GRAND';
-        let medal = '🥇';
-        let ringGradient = ctx.createLinearGradient(120, y, 680, y);
+          let curAccent = finalAccent;
+          let rankText = '1st PLACE GRAND';
+          let medal = '🥇';
+          let ringGradient = ctx.createLinearGradient(cardX + 20, y, cardX + 580, y);
 
-        if (place === 1) {
-          curAccent = finalAccent;
-          rankText = '1st PLACE GRAND';
-          medal = '🥇';
-          ringGradient.addColorStop(0, hexToRgba(finalAccent, 0.25)); // branded tint
-          ringGradient.addColorStop(0.5, isDark ? '#1E1E22' : '#F8FAFC');
-          ringGradient.addColorStop(1, cardBgColor);
-        } else if (place === 2) {
-          curAccent = secondaryAccent;
-          rankText = '2nd PLACE';
-          medal = '🥈';
-          ringGradient.addColorStop(0, isDark ? 'rgba(148, 163, 184, 0.15)' : 'rgba(148, 163, 184, 0.08)'); // silver
-          ringGradient.addColorStop(0.5, isDark ? '#1E1E22' : '#F8FAFC');
-          ringGradient.addColorStop(1, cardBgColor);
-        } else {
-          curAccent = tertiaryAccent;
-          rankText = '3rd PLACE';
-          medal = '🥉';
-          ringGradient.addColorStop(0, isDark ? 'rgba(217, 119, 6, 0.15)' : 'rgba(217, 119, 6, 0.08)'); // bronze
-          ringGradient.addColorStop(0.5, isDark ? '#1E1E22' : '#F8FAFC');
-          ringGradient.addColorStop(1, cardBgColor);
-        }
+          if (place === 1) {
+            curAccent = finalAccent;
+            rankText = '1st PLACE GRAND';
+            medal = '🥇';
+            ringGradient.addColorStop(0, hexToRgba(finalAccent, 0.25)); // branded tint
+            ringGradient.addColorStop(0.5, isDark ? '#1E1E22' : '#F8FAFC');
+            ringGradient.addColorStop(1, cardBgColor);
+          } else if (place === 2) {
+            curAccent = secondaryAccent;
+            rankText = '2nd PLACE';
+            medal = '🥈';
+            ringGradient.addColorStop(0, isDark ? 'rgba(148, 163, 184, 0.15)' : 'rgba(148, 163, 184, 0.08)'); // silver
+            ringGradient.addColorStop(0.5, isDark ? '#1E1E22' : '#F8FAFC');
+            ringGradient.addColorStop(1, cardBgColor);
+          } else {
+            curAccent = tertiaryAccent;
+            rankText = '3rd PLACE';
+            medal = '🥉';
+            ringGradient.addColorStop(0, isDark ? 'rgba(217, 119, 6, 0.15)' : 'rgba(217, 119, 6, 0.08)'); // bronze
+            ringGradient.addColorStop(0.5, isDark ? '#1E1E22' : '#F8FAFC');
+            ringGradient.addColorStop(1, cardBgColor);
+          }
 
-        // Draw Row Card container
-        ctx.fillStyle = cardBgColor;
-        ctx.strokeStyle = curAccent + (isDark ? '30' : '55');
-        ctx.lineWidth = 1.5;
-        
-        ctx.save();
-        if (!isDark) {
-          ctx.shadowColor = 'rgba(15, 23, 42, 0.05)';
-          ctx.shadowBlur = 10;
-          ctx.shadowOffsetY = 4;
-        }
-        ctx.beginPath();
-        ctx.roundRect(100, y, 600, 145, 16);
-        ctx.fill();
-        ctx.restore();
-
-        ctx.beginPath();
-        ctx.roundRect(100, y, 600, 145, 16);
-        ctx.stroke();
-
-        // Draw left side inner color gradient stripe
-        ctx.fillStyle = ringGradient;
-        ctx.beginPath();
-        ctx.roundRect(101, y + 1, 350, 143, [16, 0, 0, 16]);
-        ctx.fill();
-
-        // Draw Medal Ring
-        ctx.shadowBlur = isDark ? 8 : 2;
-        ctx.shadowColor = curAccent;
-        ctx.fillStyle = '#FFFFFF';
-        ctx.beginPath();
-        ctx.arc(175, y + 72, 40, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.shadowBlur = 0;
-
-        ctx.strokeStyle = curAccent;
-        ctx.lineWidth = 4;
-        ctx.beginPath();
-        ctx.arc(175, y + 72, 38, 0, Math.PI * 2);
-        ctx.stroke();
-
-        // Medal Icon
-        ctx.fillStyle = '#0F172A';
-        ctx.font = 'bold 36px "Kantumruy Pro", sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(medal, 175, y + 70);
-
-        // Name, Rank and Prize Text
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'middle';
-
-        // Rank Badge Level
-        ctx.fillStyle = curAccent;
-        ctx.font = 'bold 15px "Space Grotesk", sans-serif';
-        ctx.fillText(rankText, 245, y + 42);
-
-        // Winner Name
-        ctx.fillStyle = textColor;
-        ctx.font = 'bold 26px "Kantumruy Pro", sans-serif';
-        const nameStr = winner ? winner.name : 'រង់ចាំការបង្វិល';
-        ctx.fillText(nameStr, 245, y + 74);
-
-        // Prize Name
-        ctx.fillStyle = textSecColor;
-        ctx.font = '500 15px "Kantumruy Pro", sans-serif';
-        ctx.fillText('រង្វាន់ឈ្នះ៖ ' + prize.title, 245, y + 107);
-
-        // Draw Winner Custom Avatar on extreme right
-        const avatarCX = 620;
-        const avatarCY = y + 72;
-        const avatarR = 43;
-
-        ctx.fillStyle = isDark ? '#0A0A0B' : '#E2E8F0';
-        ctx.beginPath();
-        ctx.arc(avatarCX, avatarCY, avatarR, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.strokeStyle = winner?.avatar ? curAccent : (isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(30, 41, 59, 0.1)');
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.arc(avatarCX, avatarCY, avatarR, 0, Math.PI * 2);
-        ctx.stroke();
-
-        if (winnerAvatars[place]) {
+          // Draw Row Card container
+          ctx.fillStyle = cardBgColor;
+          ctx.strokeStyle = curAccent + (isDark ? '30' : '55');
+          ctx.lineWidth = 1.5;
+          
           ctx.save();
+          if (!isDark) {
+            ctx.shadowColor = 'rgba(15, 23, 42, 0.05)';
+            ctx.shadowBlur = 10;
+            ctx.shadowOffsetY = 4;
+          }
           ctx.beginPath();
-          ctx.arc(avatarCX, avatarCY, avatarR - 1.5, 0, Math.PI * 2);
-          ctx.clip();
-          ctx.drawImage(
-            winnerAvatars[place]!, 
-            avatarCX - (avatarR - 1.5), 
-            avatarCY - (avatarR - 1.5), 
-            (avatarR - 1.5) * 2, 
-            (avatarR - 1.5) * 2
-          );
+          ctx.roundRect(cardX, y, 600, 145, 16);
+          ctx.fill();
           ctx.restore();
-        } else {
-          ctx.font = 'bold 24px "Kantumruy Pro", sans-serif';
+
+          ctx.beginPath();
+          ctx.roundRect(cardX, y, 600, 145, 16);
+          ctx.stroke();
+
+          // Draw left side inner color gradient stripe
+          ctx.fillStyle = ringGradient;
+          ctx.beginPath();
+          ctx.roundRect(cardX + 1, y + 1, 350, 143, [16, 0, 0, 16]);
+          ctx.fill();
+
+          // Draw Medal Ring
+          ctx.shadowBlur = isDark ? 8 : 2;
+          ctx.shadowColor = curAccent;
+          ctx.fillStyle = '#FFFFFF';
+          ctx.beginPath();
+          ctx.arc(cardX + 75, y + 72, 40, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.shadowBlur = 0;
+
+          ctx.strokeStyle = curAccent;
+          ctx.lineWidth = 4;
+          ctx.beginPath();
+          ctx.arc(cardX + 75, y + 72, 38, 0, Math.PI * 2);
+          ctx.stroke();
+
+          // Medal Icon
+          ctx.fillStyle = '#0F172A';
+          ctx.font = 'bold 36px "Kantumruy Pro", sans-serif';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
-          ctx.fillStyle = '#555860';
-          ctx.fillText('👤', avatarCX, avatarCY - 2);
-        }
-      });
+          ctx.fillText(medal, cardX + 75, y + 70);
 
-    } else {
-      // HORIZONTAL (LANDSCAPE) TEMPLATE - 3-column elegant layout
-      const startY = 225;
-      const cardWidth = 270;
-      const xPositions = [80, 365, 650]; // Perfectly spaced: colX, gap 15
-      
-      places.forEach((place, index) => {
-        const winner = winners[place];
-        const prize = prizes[place];
-        const x = xPositions[index];
+          // Name, Rank and Prize Text
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'middle';
 
-        let curAccent = finalAccent;
-        let rankText = '1st PLACE GRAND';
-        let medal = '🥇';
-        const cardGradient = ctx.createLinearGradient(x, startY + 1, x + cardWidth, startY + 80);
+          // Rank Badge Level
+          ctx.fillStyle = curAccent;
+          ctx.font = 'bold 15px "Space Grotesk", sans-serif';
+          ctx.fillText(rankText, cardX + 145, y + 42);
 
-        if (place === 1) {
-          curAccent = finalAccent;
-          rankText = '1st PLACE GRAND';
-          medal = '🥇';
-          cardGradient.addColorStop(0, hexToRgba(finalAccent, 0.28));
-          cardGradient.addColorStop(1, cardBgColor);
-        } else if (place === 2) {
-          curAccent = secondaryAccent;
-          rankText = '2nd PLACE';
-          medal = '🥈';
-          cardGradient.addColorStop(0, isDark ? 'rgba(148, 163, 184, 0.18)' : 'rgba(148, 163, 184, 0.10)');
-          cardGradient.addColorStop(1, cardBgColor);
-        } else {
-          curAccent = tertiaryAccent;
-          rankText = '3rd PLACE';
-          medal = '🥉';
-          cardGradient.addColorStop(0, isDark ? 'rgba(217, 119, 6, 0.18)' : 'rgba(217, 119, 6, 0.10)');
-          cardGradient.addColorStop(1, cardBgColor);
-        }
-
-        // Card Container Base
-        ctx.fillStyle = cardBgColor;
-        ctx.strokeStyle = curAccent + (isDark ? '30' : '55');
-        ctx.lineWidth = 1.5;
-        
-        ctx.save();
-        if (!isDark) {
-          ctx.shadowColor = 'rgba(15, 23, 42, 0.05)';
-          ctx.shadowBlur = 10;
-          ctx.shadowOffsetY = 4;
-        }
-        ctx.beginPath();
-        ctx.roundRect(x, startY, cardWidth, 290, 16);
-        ctx.fill();
-        ctx.restore();
-
-        ctx.beginPath();
-        ctx.roundRect(x, startY, cardWidth, 290, 16);
-        ctx.stroke();
-
-        // Banner Header style strip inside top card
-        ctx.fillStyle = cardGradient;
-        ctx.beginPath();
-        ctx.roundRect(x + 1, startY + 1, cardWidth - 2, 85, [16, 16, 0, 0]);
-        ctx.fill();
-
-        // 1. Large Circular Winner Avatar (centered inside header banner)
-        const avatarCX = x + cardWidth / 2;
-        const avatarCY = startY + 80;
-        const avatarR = 45;
-
-        ctx.fillStyle = isDark ? '#0A0A0B' : '#E2E8F0';
-        ctx.beginPath();
-        ctx.arc(avatarCX, avatarCY, avatarR, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.strokeStyle = winner?.avatar ? curAccent : (isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(30, 41, 59, 0.12)');
-        ctx.lineWidth = 3.5;
-        ctx.beginPath();
-        ctx.arc(avatarCX, avatarCY, avatarR, 0, Math.PI * 2);
-        ctx.stroke();
-
-        if (winnerAvatars[place]) {
-          ctx.save();
-          ctx.beginPath();
-          ctx.arc(avatarCX, avatarCY, avatarR - 1.5, 0, Math.PI * 2);
-          ctx.clip();
-          ctx.drawImage(
-            winnerAvatars[place]!, 
-            avatarCX - (avatarR - 1.5), 
-            avatarCY - (avatarR - 1.5), 
-            (avatarR - 1.5) * 2, 
-            (avatarR - 1.5) * 2
-          );
-          ctx.restore();
-        } else {
+          // Winner Name
+          ctx.fillStyle = textColor;
           ctx.font = 'bold 26px "Kantumruy Pro", sans-serif';
+          const nameStr = winner ? winner.name : 'រង់ចាំការបង្វិល';
+          ctx.fillText(nameStr, cardX + 145, y + 74);
+
+          // Prize Name
+          ctx.save();
+          const activePrizeColor = place === 1 ? (prize1Color || textSecColor) : place === 2 ? (prize2Color || textSecColor) : (prize3Color || textSecColor);
+          const activePrizeScale = place === 1 ? prize1Scale : place === 2 ? prize2Scale : prize3Scale;
+          ctx.fillStyle = activePrizeColor;
+          ctx.font = `500 ${Math.round(15 * activePrizeScale)}px "Kantumruy Pro", sans-serif`;
+          ctx.fillText('រង្វាន់ឈ្នះ៖ ' + prize.title, cardX + 145, y + 107);
+          ctx.restore();
+
+          // Draw Winner Custom Avatar on extreme right
+          const avatarCX = cardX + 520;
+          const avatarCY = y + 72;
+          const avatarR = 43;
+
+          ctx.fillStyle = isDark ? '#0A0A0B' : '#E2E8F0';
+          ctx.beginPath();
+          ctx.arc(avatarCX, avatarCY, avatarR, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.strokeStyle = winner?.avatar ? curAccent : (isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(30, 41, 59, 0.1)');
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.arc(avatarCX, avatarCY, avatarR, 0, Math.PI * 2);
+          ctx.stroke();
+
+          if (winnerAvatars[place]) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(avatarCX, avatarCY, avatarR - 1.5, 0, Math.PI * 2);
+            ctx.clip();
+            ctx.drawImage(
+              winnerAvatars[place]!, 
+              avatarCX - (avatarR - 1.5), 
+              avatarCY - (avatarR - 1.5), 
+              (avatarR - 1.5) * 2, 
+              (avatarR - 1.5) * 2
+            );
+            ctx.restore();
+          } else {
+            ctx.font = 'bold 24px "Kantumruy Pro", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = '#555860';
+            ctx.fillText('👤', avatarCX, avatarCY - 2);
+          }
+        });
+
+      } else {
+        // HORIZONTAL (LANDSCAPE) TEMPLATE - 3-column elegant layout
+        const startY = 225 + winnersOffsetY;
+        const cardWidth = 270;
+        const xPositions = [80, 365, 650]; // Perfectly spaced: colX, gap 15
+        
+        places.forEach((place, index) => {
+          const winner = winners[place];
+          const prize = prizes[place];
+          const x = xPositions[index] + winnersOffsetX;
+
+          let curAccent = finalAccent;
+          let rankText = '1st PLACE GRAND';
+          let medal = '🥇';
+          const cardGradient = ctx.createLinearGradient(x, startY + 1, x + cardWidth, startY + 80);
+
+          if (place === 1) {
+            curAccent = finalAccent;
+            rankText = '1st PLACE GRAND';
+            medal = '🥇';
+            cardGradient.addColorStop(0, hexToRgba(finalAccent, 0.28));
+            cardGradient.addColorStop(1, cardBgColor);
+          } else if (place === 2) {
+            curAccent = secondaryAccent;
+            rankText = '2nd PLACE';
+            medal = '🥈';
+            cardGradient.addColorStop(0, isDark ? 'rgba(148, 163, 184, 0.18)' : 'rgba(148, 163, 184, 0.10)');
+            cardGradient.addColorStop(1, cardBgColor);
+          } else {
+            curAccent = tertiaryAccent;
+            rankText = '3rd PLACE';
+            medal = '🥉';
+            cardGradient.addColorStop(0, isDark ? 'rgba(217, 119, 6, 0.18)' : 'rgba(217, 119, 6, 0.10)');
+            cardGradient.addColorStop(1, cardBgColor);
+          }
+
+          // Card Container Base
+          ctx.fillStyle = cardBgColor;
+          ctx.strokeStyle = curAccent + (isDark ? '30' : '55');
+          ctx.lineWidth = 1.5;
+          
+          ctx.save();
+          if (!isDark) {
+            ctx.shadowColor = 'rgba(15, 23, 42, 0.05)';
+            ctx.shadowBlur = 10;
+            ctx.shadowOffsetY = 4;
+          }
+          ctx.beginPath();
+          ctx.roundRect(x, startY, cardWidth, 290, 16);
+          ctx.fill();
+          ctx.restore();
+
+          ctx.beginPath();
+          ctx.roundRect(x, startY, cardWidth, 290, 16);
+          ctx.stroke();
+
+          // Banner Header style strip inside top card
+          ctx.fillStyle = cardGradient;
+          ctx.beginPath();
+          ctx.roundRect(x + 1, startY + 1, cardWidth - 2, 85, [16, 16, 0, 0]);
+          ctx.fill();
+
+          // 1. Large Circular Winner Avatar (centered inside header banner)
+          const avatarCX = x + cardWidth / 2;
+          const avatarCY = startY + 80;
+          const avatarR = 45;
+
+          ctx.fillStyle = isDark ? '#0A0A0B' : '#E2E8F0';
+          ctx.beginPath();
+          ctx.arc(avatarCX, avatarCY, avatarR, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.strokeStyle = winner?.avatar ? curAccent : (isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(30, 41, 59, 0.12)');
+          ctx.lineWidth = 3.5;
+          ctx.beginPath();
+          ctx.arc(avatarCX, avatarCY, avatarR, 0, Math.PI * 2);
+          ctx.stroke();
+
+          if (winnerAvatars[place]) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(avatarCX, avatarCY, avatarR - 1.5, 0, Math.PI * 2);
+            ctx.clip();
+            ctx.drawImage(
+              winnerAvatars[place]!, 
+              avatarCX - (avatarR - 1.5), 
+              avatarCY - (avatarR - 1.5), 
+              (avatarR - 1.5) * 2, 
+              (avatarR - 1.5) * 2
+            );
+            ctx.restore();
+          } else {
+            ctx.font = 'bold 26px "Kantumruy Pro", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = '#555860';
+            ctx.fillText('👤', avatarCX, avatarCY - 2);
+          }
+
+          // 2. Elegant overlying Medal Badge Circle (overlapping the avatar)
+          const badgeCX = avatarCX + 28;
+          const badgeCY = avatarCY + 28;
+          const badgeR = 17;
+
+          ctx.shadowBlur = 6;
+          ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
+          ctx.fillStyle = '#FFFFFF';
+          ctx.beginPath();
+          ctx.arc(badgeCX, badgeCY, badgeR, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.shadowBlur = 0;
+
+          ctx.strokeStyle = curAccent;
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.arc(badgeCX, badgeCY, badgeR, 0, Math.PI * 2);
+          ctx.stroke();
+
+          ctx.fillStyle = '#0F172A';
+          ctx.font = 'bold 15px "Kantumruy Pro", sans-serif';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
-          ctx.fillStyle = '#555860';
-          ctx.fillText('👤', avatarCX, avatarCY - 2);
-        }
+          ctx.fillText(medal, badgeCX, badgeCY - 1);
 
-        // 2. Elegant overlying Medal Badge Circle (overlapping the avatar)
-        const badgeCX = avatarCX + 28;
-        const badgeCY = avatarCY + 28;
-        const badgeR = 17;
+          // 3. Typographic Information block (Below avatar)
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
 
-        ctx.shadowBlur = 6;
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
-        ctx.fillStyle = '#FFFFFF';
-        ctx.beginPath();
-        ctx.arc(badgeCX, badgeCY, badgeR, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.shadowBlur = 0;
+          // Rank level designation tag
+          ctx.fillStyle = curAccent;
+          ctx.font = 'bold 13px "Space Grotesk", sans-serif';
+          ctx.fillText(rankText, x + cardWidth / 2, startY + 155);
 
-        ctx.strokeStyle = curAccent;
-        ctx.lineWidth = 2.5;
-        ctx.beginPath();
-        ctx.arc(badgeCX, badgeCY, badgeR, 0, Math.PI * 2);
-        ctx.stroke();
+          // Winner Name
+          ctx.fillStyle = textColor;
+          ctx.font = 'bold 22px "Kantumruy Pro", sans-serif';
+          const nameStr = winner ? winner.name : 'រង់ចាំការបង្វិល';
+          ctx.fillText(nameStr, x + cardWidth / 2, startY + 192);
 
-        ctx.fillStyle = '#0F172A';
-        ctx.font = 'bold 15px "Kantumruy Pro", sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(medal, badgeCX, badgeCY - 1);
-
-        // 3. Typographic Information block (Below avatar)
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-
-        // Rank level designation tag
-        ctx.fillStyle = curAccent;
-        ctx.font = 'bold 13px "Space Grotesk", sans-serif';
-        ctx.fillText(rankText, x + cardWidth / 2, startY + 155);
-
-        // Winner Name
-        ctx.fillStyle = textColor;
-        ctx.font = 'bold 22px "Kantumruy Pro", sans-serif';
-        const nameStr = winner ? winner.name : 'រង់ចាំការបង្វិល';
-        ctx.fillText(nameStr, x + cardWidth / 2, startY + 192);
-
-        // Prize Name
-        ctx.fillStyle = textSecColor;
-        ctx.font = '500 13px "Kantumruy Pro", sans-serif';
-        ctx.fillText('រង្វាន់ឈ្នះ៖ ' + prize.title, x + cardWidth / 2, startY + 232);
-      });
+          // Prize Name
+          ctx.save();
+          const activePrizeColor = place === 1 ? (prize1Color || textSecColor) : place === 2 ? (prize2Color || textSecColor) : (prize3Color || textSecColor);
+          const activePrizeScale = place === 1 ? prize1Scale : place === 2 ? prize2Scale : prize3Scale;
+          ctx.fillStyle = activePrizeColor;
+          ctx.font = `500 ${Math.round(13 * activePrizeScale)}px "Kantumruy Pro", sans-serif`;
+          ctx.fillText('រង្វាន់ឈ្នះ៖ ' + prize.title, x + cardWidth / 2, startY + 232);
+          ctx.restore();
+        });
+      }
     }
 
     // 6. CONGRATULATIONS BOTTOM SECTION
@@ -1096,18 +1650,46 @@ export default function PosterGenerator({
     ctx.stroke();
 
     // Customizable Khmer congratulation message
-    ctx.fillStyle = isDark ? '#e2e8f0' : '#334155'; 
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.font = orientation === 'portrait' 
-      ? '500 18px "Kantumruy Pro", "Inter", sans-serif'
-      : '500 15px "Kantumruy Pro", "Inter", sans-serif';
-    
-    const finalCongrats = settings.congratulationsText.trim() !== ''
-      ? settings.congratulationsText
-      : 'អបអរសាទរអ្នកឈ្នះទាំងអស់គ្នា! ចែករំលែកសេចក្តីរីករាយ ជាមួយពួកយើងប្រកបដោយមោទនភាព។';
+    if (showLayerCongrats) {
+      ctx.save();
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      
+      const baseCongratsSize = orientation === 'portrait' ? 18 : 15;
+      ctx.font = `500 ${Math.round(baseCongratsSize * congratsScale)}px "Kantumruy Pro", "Inter", sans-serif`;
+      
+      const finalCongrats = congratsText || settings.congratulationsText || 'អបអរសាទរអ្នកឈ្នះទាំងអស់គ្នា! ចែករំលែកសេចក្តីរីករាយ ជាមួយពួកយើងប្រកបដោយមោទនភាព។';
 
-    ctx.fillText(finalCongrats, width / 2, bottomY + 45);
+      const congratsX = width / 2 + congratsOffsetX;
+      const congratsY = bottomY + 45 + congratsOffsetY;
+
+      if (isCongratsGradient) {
+        const congratsGrad = ctx.createLinearGradient(congratsX, congratsY - 20, congratsX, congratsY + 20);
+        congratsGrad.addColorStop(0, congratsColor || '#FFFFFF');
+        congratsGrad.addColorStop(1, congratsColor2 || '#94A3B8');
+        ctx.fillStyle = congratsGrad;
+      } else {
+        ctx.fillStyle = congratsColor || (isDark ? '#e2e8f0' : '#334155'); 
+      }
+      ctx.fillText(finalCongrats, congratsX, congratsY);
+      ctx.restore();
+    }
+
+    // Draw multiple customizable extra texts on top
+    extraTexts.forEach((layer) => {
+      ctx.fillStyle = layer.color || '#FFFFFF';
+      ctx.textAlign = 'center';
+      
+      const layerSize = layer.size || 20;
+      ctx.font = `${layer.bold ? 'bold' : 'normal'} ${layerSize}px "Kantumruy Pro", "Space Grotesk", sans-serif`;
+      
+      if (layer.shadow) {
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
+        ctx.shadowBlur = 6;
+      }
+      ctx.fillText(layer.text, (layer.x / 100) * width, (layer.y / 100) * height);
+      ctx.shadowBlur = 0; // reset
+    });
 
     // Branding signature footer
     ctx.fillStyle = '#475569'; 
@@ -1281,66 +1863,147 @@ export default function PosterGenerator({
         {/* Right Side: Exporter details, instructions and share buttons */}
         <div className="flex-grow w-full space-y-4">
 
-          {/* BACKGROUND PRESET SELECTOR PANEL */}
-          <div className="bg-[#161618] border border-white/5 p-5 rounded-2xl space-y-4 shadow-xl animate-fade-in" id="background-presets-selector-panel">
+          {/* PLAYGROUND STYLE INTERACTIVE LAYERS MANAGER PANEL */}
+          <div className="bg-[#161618] border border-white/5 p-5 rounded-2xl space-y-4 shadow-xl" id="poster-interactive-layers-manager">
             <div className="flex items-center gap-2 border-b border-white/5 pb-3">
-              <Palette className="w-4 h-4 text-orange-500 animate-pulse" />
+              <Layers className="w-4 h-4 text-orange-500 animate-pulse" />
               <h3 className="text-white text-sm font-sans font-semibold">
-                ជ្រើសរើសផ្ទៃខាងក្រោយរចនា (Select Poster Background Style)
+                {lang === 'km' ? 'ស្រទាប់រចនាកែសម្រួលផ្ទាំងគំនូរ (Poster Design Layers Mode)' : 'Poster Interactive Design Layers'}
               </h3>
             </div>
-
-            <p className="text-slate-400 text-xs leading-relaxed font-sans">
-              សូមជ្រើសរើសទម្រង់សិល្បៈ និងរូបភាពផ្ទៃខាងក្រោយដែលអ្នកពេញចិត្ត។ ប្រលងរៀបចំដោយម៉ាស៊ីនវិភាគពណ៌វៃឆ្លាត នឹងគូររូបភាពសោភណភាពដោយស្វ័យប្រវត្តិតាមជម្រើស៖
+            
+            <p className="text-slate-400 text-xs leading-relaxed font-sans mb-3">
+              {lang === 'km' 
+                ? 'កែប្រែពណ៌ មាត្រដ្ឋាន ទំហំអក្សរ និងការលាយពណ៌ដោយសេរីតាមស្រទាប់នីមួយៗ (Figma & photoshop Layers Accordion Control)៖' 
+                : 'Control rendering colors, sizes, content, visibility and advanced mixing gradients step-by-step for each layer component:'}
             </p>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-              {BACKGROUND_PRESETS.map((preset) => {
-                const isActive = bgPreset === preset.id;
-                return (
-                  <button
-                    key={preset.id}
-                    onClick={() => setBgPreset(preset.id)}
-                    className={`text-left p-3 rounded-xl border transition-all duration-205 cursor-pointer flex flex-col justify-between h-28 relative overflow-hidden group
-                      ${isActive 
-                        ? 'border-orange-500 bg-[#1E1E21] shadow-lg shadow-orange-500/10' 
-                        : 'border-white/5 bg-[#111112] hover:border-white/10 hover:bg-[#1a1a1c]'}`}
-                    id={`btn-preset-${preset.id}`}
-                  >
-                    {/* Visual representative backdrop gradient bulb */}
-                    <div className={`absolute -right-6 -bottom-6 w-16 h-16 rounded-full bg-gradient-to-br ${preset.gradient} blur-[4px] opacity-65 group-hover:scale-125 transition-transform duration-300`} />
-                    
-                    <div className="space-y-1 relative z-10">
-                      <div className="flex items-center gap-1.5">
-                        <span 
-                          className="w-2.5 h-2.5 rounded-full" 
-                          style={{ 
-                            backgroundColor: preset.id === 'brand-neon' ? logoAccentColor : preset.badgeColor,
-                            boxShadow: `0 0 8px ${preset.id === 'brand-neon' ? logoAccentColor : preset.badgeColor}`
-                          }} 
-                        />
-                        <span className="text-white text-xs font-sans font-bold">
-                          {preset.name}
-                        </span>
-                      </div>
-                      <span className="text-[10px] text-slate-500 font-mono block">
-                        {preset.enName}
+            <div className="space-y-3">
+              
+              {/* LAYER 1: BACKGROUND STYLE */}
+              <div className={`border rounded-xl overflow-hidden transition-all duration-200 ${activeLayer === 'background' ? 'border-orange-500/55 bg-[#111112]' : 'border-white/5 bg-[#121213]'}`}>
+                <div 
+                  onClick={() => setActiveLayer(activeLayer === 'background' ? '' : 'background')}
+                  className="flex items-center justify-between p-3 cursor-pointer hover:bg-white/[0.02] select-none"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Palette className={`w-4 h-4 ${activeLayer === 'background' ? 'text-orange-500' : 'text-slate-400'}`} />
+                    <div className="text-left">
+                      <span className="text-xs font-sans font-bold text-slate-200 block">
+                        {lang === 'km' ? 'ស្រទាប់ផ្ទៃខាងក្រោយ (Background Style)' : '1. Background Style Layer'}
+                      </span>
+                      <span className="text-[10px] text-slate-500 font-sans block">
+                        {lang === 'km' ? 'ផ្ទៃខាងក្រោយប្រភេទកីឡា បាល់ទាត់ កម្សាន្ត ហ្គេម តែងនិពន្ធ' : 'Choose preloaded sport templates or upload custom backdrop'}
                       </span>
                     </div>
+                  </div>
+                  <ChevronRight className={`w-3.5 h-3.5 text-slate-500 transition-transform ${activeLayer === 'background' ? 'rotate-90 text-orange-500' : ''}`} />
+                </div>
 
-                    <p className="text-[10.5px] text-slate-400 font-sans line-clamp-2 leading-tight relative z-10">
-                      {preset.desc}
+                {activeLayer === 'background' && (
+                  <div className="p-4 border-t border-white/5 bg-[#0e0e10]/95 space-y-4 animate-fade-in text-xs">
+                    <p className="text-slate-400 text-[11px] leading-relaxed">
+                      {lang === 'km' ? 'សូមជ្រើសរើសទម្រង់សិល្បៈ និងរូបភាពផ្ទៃខាងក្រោយដែលអ្នកពេញចិត្ត៖' : 'Choose professional sports/victory backdrops matching your company preset style:'}
                     </p>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      {BACKGROUND_PRESETS.map((preset) => {
+                        const isActive = bgPreset === preset.id;
+                        return (
+                          <button
+                            key={preset.id}
+                            onClick={() => setBgPreset(preset.id)}
+                            className={`text-left p-2.5 rounded-xl border transition-all duration-205 cursor-pointer flex flex-col justify-between h-24 relative overflow-hidden group
+                              ${isActive 
+                                ? 'border-orange-500 bg-[#1e1e21] shadow-lg shadow-orange-500/10' 
+                                : 'border-white/5 bg-[#131315] hover:border-white/10 hover:bg-[#19191b]'}`}
+                          >
+                            <div className={`absolute -right-6 -bottom-6 w-16 h-16 rounded-full bg-gradient-to-br ${preset.gradient} blur-[4px] opacity-60 group-hover:scale-125 transition-transform duration-350`} />
+                            
+                            <div className="space-y-0.5 relative z-14">
+                              <div className="flex items-center gap-1.5">
+                                <span 
+                                  className="w-2 h-2 rounded-full" 
+                                  style={{ 
+                                    backgroundColor: preset.id === 'brand-neon' ? logoAccentColor : preset.badgeColor,
+                                    boxShadow: `0 0 6px ${preset.id === 'brand-neon' ? logoAccentColor : preset.badgeColor}`
+                                  }} 
+                                />
+                                <span className="text-white text-[11px] font-sans font-bold">
+                                  {preset.name}
+                                </span>
+                              </div>
+                              <span className="text-[9px] text-slate-500 font-mono block">
+                                {preset.enName}
+                              </span>
+                            </div>
 
-                    {/* Checkmark when chosen */}
-                    {isActive && (
-                      <div className="absolute top-2.5 right-2.5 bg-orange-600 rounded-full p-0.5 text-white shadow shadow-orange-950/50">
-                        <CheckCircle className="w-3 h-3" />
+                            <p className="text-[10px] text-slate-400 font-sans line-clamp-1 leading-tight relative z-10">
+                              {preset.desc}
+                            </p>
+
+                            {isActive && (
+                              <div className="absolute top-2 right-2 bg-orange-600 rounded-full p-0.5 text-white">
+                                <Check className="w-2.5 h-2.5" />
+                              </div>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <div className="border-t border-white/5 pt-3.5 mt-2">
+                      <label className="block text-xs text-slate-355 font-sans font-bold mb-2 flex items-center gap-1.5 animate-pulse">
+                        <span>📁</span>
+                        <span>{lang === 'km' ? 'ឬផ្ទុកឡើងផ្ទៃខាងក្រោយផ្ទាល់ខ្លួន (Upload Backdrop)៖' : 'Or upload custom background backdrop image:'}</span>
+                      </label>
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          id="custom-backdrop-uploader"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onload = (event) => {
+                                if (event.target?.result) {
+                                  setCustomBgImage(event.target.result as string);
+                                  setBgPreset('custom-upload');
+                                }
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                        />
+
+                        <button
+                          onClick={() => document.getElementById('custom-backdrop-uploader')?.click()}
+                          className="bg-[#1E1E21] hover:bg-[#2A2A2E] text-slate-200 border border-white/5 hover:border-orange-500 rounded-xl px-3.5 py-2 text-xs font-sans font-medium flex items-center gap-2 transition duration-200 active:scale-95 cursor-pointer shadow-md"
+                        >
+                          <Upload className="w-3.5 h-3.5 text-orange-400" />
+                          <span>{lang === 'km' ? 'ជ្រើសរើសរូបថតផ្ទៃក្រោយ' : 'Choose image'}</span>
+                        </button>
+
+                        {customBgImage && (
+                          <div className="flex items-center gap-2 animate-fade-in">
+                            <button
+                              onClick={() => {
+                                setBgPreset('luxury-gold');
+                                setCustomBgImage('');
+                              }}
+                              className="text-xs font-sans text-rose-455 hover:text-rose-400 bg-rose-950/10 hover:bg-rose-950/30 border border-rose-950/20 px-2.5 py-2 rounded-xl transition cursor-pointer"
+                            >
+                              {lang === 'km' ? 'លុបចេញ' : 'Delete'}
+                            </button>
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </button>
-                );
-              })}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
           
@@ -1469,6 +2132,875 @@ export default function PosterGenerator({
               </div>
             </div>
           )}
+
+          {/* DYNAMIC DRAGGABLE LAYERS & D-PAD COMPONENT */}
+          <div className="bg-[#161618] border border-white/5 p-5 rounded-2xl space-y-4 shadow-xl mb-4" id="draggable-layers-manager">
+            <div className="flex items-center justify-between border-b border-white/5 pb-3">
+              <div className="flex items-center gap-2">
+                <Layers className="w-4 h-4 text-orange-500 animate-pulse" />
+                <h3 className="text-white text-sm font-sans font-semibold">
+                  {lang === 'km' ? 'គ្រប់គ្រងស្រទាប់ និងអូសទីតាំង (Poster Layers Manager)' : 'Layers Position Selector & Drag Controls'}
+                </h3>
+              </div>
+              <button
+                onClick={() => {
+                  setHeaderOffsetX(0); setHeaderOffsetY(0);
+                  setMainTitleOffsetX(0); setMainTitleOffsetY(0);
+                  setSubTitleOffsetX(0); setSubTitleOffsetY(0);
+                  setWinnersOffsetX(0); setWinnersOffsetY(0);
+                  setCongratsOffsetX(0); setCongratsOffsetY(0);
+                  setLogoOffsetX(0); setLogoOffsetY(0);
+                }}
+                className="text-[10px] text-slate-400 hover:text-orange-500 flex items-center gap-1 cursor-pointer transition hover:underline"
+              >
+                <RotateCcw className="w-3 h-3" />
+                <span>Reset ទីតាំងទាំងអស់</span>
+              </button>
+            </div>
+
+            <p className="text-[11px] text-slate-400 font-sans leading-relaxed">
+              {lang === 'km' 
+                ? 'ជ្រើសរើសស្រទាប់ខាងក្រោម រួចចុចអូសឆ្វេងស្តាំលើក្រោមផ្ទាល់លើរូបភាព ឬចុចប៊ូតុងបញ្ជា (D-Pad) ខាងក្រោមបន្ទាប់៖' 
+                : 'Select any layer below to drag it interactively on the poster preview, or use the direction controls to adjust precisely:'}
+            </p>
+
+            {/* List of Layers, Styled beautifully like layers */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 bg-[#0E0E10] p-2 rounded-xl border border-white/5">
+              
+              {/* Logo Layer */}
+              <div 
+                onClick={() => setActiveDraggableLayer('logo')}
+                className={`flex items-center justify-between p-2 rounded-lg border transition cursor-pointer ${
+                  activeDraggableLayer === 'logo' 
+                    ? 'bg-orange-500/10 border-orange-500/50 text-white font-bold' 
+                    : 'bg-[#141416] border-white/5 text-slate-300 hover:bg-white/5'
+                }`}
+              >
+                <div className="flex items-center gap-2 overflow-hidden">
+                  <span className="text-xs shrink-0">🏷️</span>
+                  <div className="text-[11px] font-sans truncate pr-1">
+                    <span className="block">{lang === 'km' ? 'ឡូហ្គោម៉ាក' : 'Brand Logo'}</span>
+                    <span className="text-[9px] text-slate-500 font-mono">X: {Math.round(logoOffsetX)}px, Y: {Math.round(logoOffsetY)}px</span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowLayerLogo(!showLayerLogo);
+                  }}
+                  className={`p-1 rounded hover:bg-white/10 text-slate-400 hover:text-white ${!showLayerLogo ? 'opacity-40' : ''}`}
+                >
+                  {showLayerLogo ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                </button>
+              </div>
+
+              {/* Secondary Header Layer */}
+              <div 
+                onClick={() => setActiveDraggableLayer('header')}
+                className={`flex items-center justify-between p-2 rounded-lg border transition cursor-pointer ${
+                  activeDraggableLayer === 'header' 
+                    ? 'bg-orange-500/10 border-orange-500/50 text-white font-bold' 
+                    : 'bg-[#141416] border-white/5 text-slate-300 hover:bg-white/5'
+                }`}
+              >
+                <div className="flex items-center gap-2 overflow-hidden">
+                  <span className="text-xs shrink-0">✍️</span>
+                  <div className="text-[11px] font-sans truncate pr-1">
+                    <span className="block">{lang === 'km' ? 'អក្សរលើក្បាល' : 'Header Greeting'}</span>
+                    <span className="text-[9px] text-slate-500 font-mono">X: {Math.round(headerOffsetX)}px, Y: {Math.round(headerOffsetY)}px</span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowLayerHeader(!showLayerHeader);
+                  }}
+                  className={`p-1 rounded hover:bg-white/10 text-slate-400 hover:text-white ${!showLayerHeader ? 'opacity-40' : ''}`}
+                >
+                  {showLayerHeader ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                </button>
+              </div>
+
+              {/* Main Title Layer */}
+              <div 
+                onClick={() => setActiveDraggableLayer('main-title')}
+                className={`flex items-center justify-between p-2 rounded-lg border transition cursor-pointer ${
+                  activeDraggableLayer === 'main-title' 
+                    ? 'bg-orange-500/10 border-orange-500/50 text-white font-bold' 
+                    : 'bg-[#141416] border-white/5 text-slate-300 hover:bg-white/5'
+                }`}
+              >
+                <div className="flex items-center gap-2 overflow-hidden">
+                  <span className="text-xs shrink-0">🔠</span>
+                  <div className="text-[11px] font-sans truncate pr-1">
+                    <span className="block">{lang === 'km' ? 'ចំណងជើងធំ' : 'Main Title'}</span>
+                    <span className="text-[9px] text-slate-500 font-mono">X: {Math.round(mainTitleOffsetX)}px, Y: {Math.round(mainTitleOffsetY)}px</span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowLayerMainTitle(!showLayerMainTitle);
+                  }}
+                  className={`p-1 rounded hover:bg-white/10 text-slate-400 hover:text-white ${!showLayerMainTitle ? 'opacity-40' : ''}`}
+                >
+                  {showLayerMainTitle ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                </button>
+              </div>
+
+              {/* Subtitle Ribbon */}
+              <div 
+                onClick={() => setActiveDraggableLayer('sub-title')}
+                className={`flex items-center justify-between p-2 rounded-lg border transition cursor-pointer ${
+                  activeDraggableLayer === 'sub-title' 
+                    ? 'bg-orange-500/10 border-orange-500/50 text-white font-bold' 
+                    : 'bg-[#141416] border-white/5 text-slate-300 hover:bg-white/5'
+                }`}
+              >
+                <div className="flex items-center gap-2 overflow-hidden">
+                  <span className="text-xs shrink-0">🎗️</span>
+                  <div className="text-[11px] font-sans truncate pr-1">
+                    <span className="block">{lang === 'km' ? 'បូរចំណងជើងរង' : 'Ribbon Subtitle'}</span>
+                    <span className="text-[9px] text-slate-500 font-mono">X: {Math.round(subTitleOffsetX)}px, Y: {Math.round(subTitleOffsetY)}px</span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowLayerRibbon(!showLayerRibbon);
+                  }}
+                  className={`p-1 rounded hover:bg-white/10 text-slate-400 hover:text-white ${!showLayerRibbon ? 'opacity-40' : ''}`}
+                >
+                  {showLayerRibbon ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                </button>
+              </div>
+
+              {/* Winners Row Cards */}
+              <div 
+                onClick={() => setActiveDraggableLayer('winners')}
+                className={`flex items-center justify-between p-2 rounded-lg border transition cursor-pointer ${
+                  activeDraggableLayer === 'winners' 
+                    ? 'bg-orange-500/10 border-orange-500/50 text-white font-bold' 
+                    : 'bg-[#141416] border-white/5 text-slate-300 hover:bg-white/5'
+                }`}
+              >
+                <div className="flex items-center gap-2 overflow-hidden">
+                  <span className="text-xs shrink-0">🏆</span>
+                  <div className="text-[11px] font-sans truncate pr-1">
+                    <span className="block">{lang === 'km' ? 'កាតម្ចាស់រង្វាន់' : 'Winners List Block'}</span>
+                    <span className="text-[9px] text-slate-500 font-mono">X: {Math.round(winnersOffsetX)}px, Y: {Math.round(winnersOffsetY)}px</span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowLayerWinners(!showLayerWinners);
+                  }}
+                  className={`p-1 rounded hover:bg-white/10 text-slate-400 hover:text-white ${!showLayerWinners ? 'opacity-40' : ''}`}
+                >
+                  {showLayerWinners ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                </button>
+              </div>
+
+              {/* Bottom Congrats text */}
+              <div 
+                onClick={() => setActiveDraggableLayer('congrats')}
+                className={`flex items-center justify-between p-2 rounded-lg border transition cursor-pointer ${
+                  activeDraggableLayer === 'congrats' 
+                    ? 'bg-orange-500/10 border-orange-500/50 text-white font-bold' 
+                    : 'bg-[#141416] border-white/5 text-slate-300 hover:bg-white/5'
+                }`}
+              >
+                <div className="flex items-center gap-2 overflow-hidden">
+                  <span className="text-xs shrink-0">💬</span>
+                  <div className="text-[11px] font-sans truncate pr-1">
+                    <span className="block">{lang === 'km' ? 'សារខាងក្រោម' : 'Bottom Wishes'}</span>
+                    <span className="text-[9px] text-slate-500 font-mono">X: {Math.round(congratsOffsetX)}px, Y: {Math.round(congratsOffsetY)}px</span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowLayerCongrats(!showLayerCongrats);
+                  }}
+                  className={`p-1 rounded hover:bg-white/10 text-slate-400 hover:text-white ${!showLayerCongrats ? 'opacity-40' : ''}`}
+                >
+                  {showLayerCongrats ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                </button>
+              </div>
+
+            </div>
+
+            {/* Selected Active Layer Customizer D-Pad & Precise Manual adjustment */}
+            <div className="bg-[#111112] p-4 rounded-xl border border-white/5 space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-sans text-slate-300 font-semibold uppercase flex flex-wrap items-center gap-1">
+                  <Move className="w-3.5 h-3.5 text-orange-500" />
+                  <span>
+                    {lang === 'km' ? 'បញ្ជាទាញក្តាររំកិលទីតាំងស្រទាប់៖' : 'Active Layer Position Control:'}
+                  </span>
+                  <span className="text-orange-500 font-bold ml-1">
+                    {activeDraggableLayer === 'logo' ? (lang === 'km' ? 'ឡូហ្គោម៉ាក' : 'Brand Logo') :
+                     activeDraggableLayer === 'header' ? (lang === 'km' ? 'អក្សរលើក្បាល' : 'Secondary Header') :
+                     activeDraggableLayer === 'main-title' ? (lang === 'km' ? 'ចំណងជើងធំ' : 'Main Title') :
+                     activeDraggableLayer === 'sub-title' ? (lang === 'km' ? 'បូរចំណងជើងរង' : 'Ribbon Subtitle') :
+                     activeDraggableLayer === 'winners' ? (lang === 'km' ? 'កាតម្ចាស់រង្វាន់' : 'Winners List Block') :
+                     (lang === 'km' ? 'សារអបអរសាទរខាងក្រោម' : 'Congratulations Banner Text')}
+                  </span>
+                </span>
+                <button
+                  onClick={() => {
+                    if (activeDraggableLayer === 'logo') { setLogoOffsetX(0); setLogoOffsetY(0); }
+                    else if (activeDraggableLayer === 'header') { setHeaderOffsetX(0); setHeaderOffsetY(0); }
+                    else if (activeDraggableLayer === 'main-title') { setMainTitleOffsetX(0); setMainTitleOffsetY(0); }
+                    else if (activeDraggableLayer === 'sub-title') { setSubTitleOffsetX(0); setSubTitleOffsetY(0); }
+                    else if (activeDraggableLayer === 'winners') { setWinnersOffsetX(0); setWinnersOffsetY(0); }
+                    else if (activeDraggableLayer === 'congrats') { setCongratsOffsetX(0); setCongratsOffsetY(0); }
+                  }}
+                  className="bg-white/5 hover:bg-white/10 hover:text-white text-slate-400 active:scale-95 py-1 px-2 rounded text-[10px] cursor-pointer transition flex items-center gap-1"
+                >
+                  <RotateCcw className="w-2.5 h-2.5" />
+                  <span>Reset ទីតាំងដើម</span>
+                </button>
+              </div>
+
+              {/* D-Pad controls & coordinates details */}
+              <div className="flex flex-col sm:flex-row items-center justify-around gap-4 bg-[#0A0A0C] p-3 rounded-xl border border-white/5">
+                
+                {/* Visual D-Pad Layout */}
+                <div className="relative w-28 h-28 shrink-0 flex items-center justify-center">
+                  <div className="absolute w-[112px] h-[112px] rounded-full border border-white/5 bg-[#121214] pointer-events-none"></div>
+                  
+                  {/* UP BUTTON */}
+                  <button
+                    onClick={() => {
+                      const step = 5;
+                      if (activeDraggableLayer === 'logo') setLogoOffsetY(prev => prev - step);
+                      else if (activeDraggableLayer === 'header') setHeaderOffsetY(prev => prev - step);
+                      else if (activeDraggableLayer === 'main-title') setMainTitleOffsetY(prev => prev - step);
+                      else if (activeDraggableLayer === 'sub-title') setSubTitleOffsetY(prev => prev - step);
+                      else if (activeDraggableLayer === 'winners') setWinnersOffsetY(prev => prev - step);
+                      else if (activeDraggableLayer === 'congrats') setCongratsOffsetY(prev => prev - step);
+                    }}
+                    className="absolute top-1.5 w-8 h-8 rounded-lg bg-[#1D1D20] hover:bg-orange-600 hover:text-white border border-white/5 shadow-md flex items-center justify-center text-xs text-slate-300 cursor-pointer transition active:scale-90"
+                    title={lang === 'km' ? 'រំកិលឡើងលើ' : 'Nudge Up (-5px)'}
+                  >
+                    ▲
+                  </button>
+
+                  {/* LEFT BUTTON */}
+                  <button
+                    onClick={() => {
+                      const step = 5;
+                      if (activeDraggableLayer === 'logo') setLogoOffsetX(prev => prev - step);
+                      else if (activeDraggableLayer === 'header') setHeaderOffsetX(prev => prev - step);
+                      else if (activeDraggableLayer === 'main-title') setMainTitleOffsetX(prev => prev - step);
+                      else if (activeDraggableLayer === 'sub-title') setSubTitleOffsetX(prev => prev - step);
+                      else if (activeDraggableLayer === 'winners') setWinnersOffsetX(prev => prev - step);
+                      else if (activeDraggableLayer === 'congrats') setCongratsOffsetX(prev => prev - step);
+                    }}
+                    className="absolute left-1.5 w-8 h-8 rounded-lg bg-[#1D1D20] hover:bg-orange-600 hover:text-white border border-white/5 shadow-md flex items-center justify-center text-xs text-slate-300 cursor-pointer transition active:scale-95"
+                    title={lang === 'km' ? 'រំកិលទៅឆ្វេង' : 'Nudge Left (-5px)'}
+                  >
+                    ◀
+                  </button>
+
+                  {/* CENTER ICON */}
+                  <div className="absolute w-7 h-7 rounded-full bg-[#141416] border border-orange-500/20 flex items-center justify-center text-orange-500 pointer-events-none">
+                    <Move className="w-3.5 h-3.5" />
+                  </div>
+
+                  {/* RIGHT BUTTON */}
+                  <button
+                    onClick={() => {
+                      const step = 5;
+                      if (activeDraggableLayer === 'logo') setLogoOffsetX(prev => prev + step);
+                      else if (activeDraggableLayer === 'header') setHeaderOffsetX(prev => prev + step);
+                      else if (activeDraggableLayer === 'main-title') setMainTitleOffsetX(prev => prev + step);
+                      else if (activeDraggableLayer === 'sub-title') setSubTitleOffsetX(prev => prev + step);
+                      else if (activeDraggableLayer === 'winners') setWinnersOffsetX(prev => prev + step);
+                      else if (activeDraggableLayer === 'congrats') setCongratsOffsetX(prev => prev + step);
+                    }}
+                    className="absolute right-1.5 w-8 h-8 rounded-lg bg-[#1D1D20] hover:bg-orange-600 hover:text-white border border-white/5 shadow-md flex items-center justify-center text-xs text-slate-300 cursor-pointer transition active:scale-95"
+                    title={lang === 'km' ? 'រំកិលទៅស្តាំ' : 'Nudge Right (+5px)'}
+                  >
+                    ▶
+                  </button>
+
+                  {/* DOWN BUTTON */}
+                  <button
+                    onClick={() => {
+                      const step = 5;
+                      if (activeDraggableLayer === 'logo') setLogoOffsetY(prev => prev + step);
+                      else if (activeDraggableLayer === 'header') setHeaderOffsetY(prev => prev + step);
+                      else if (activeDraggableLayer === 'main-title') setMainTitleOffsetY(prev => prev + step);
+                      else if (activeDraggableLayer === 'sub-title') setSubTitleOffsetY(prev => prev + step);
+                      else if (activeDraggableLayer === 'winners') setWinnersOffsetY(prev => prev + step);
+                      else if (activeDraggableLayer === 'congrats') setCongratsOffsetY(prev => prev + step);
+                    }}
+                    className="absolute bottom-1.5 w-8 h-8 rounded-lg bg-[#1D1D20] hover:bg-orange-600 hover:text-white border border-white/5 shadow-md flex items-center justify-center text-xs text-slate-300 cursor-pointer transition active:scale-90"
+                    title={lang === 'km' ? 'រំកិលចុះក្រោម' : 'Nudge Down (+5px)'}
+                  >
+                    ▼
+                  </button>
+                </div>
+
+                {/* Range Sliders for Precision tuning */}
+                <div className="flex-grow space-y-3.5 w-full">
+                  
+                  {/* Slider X */}
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-[11px] text-slate-400 font-sans">
+                      <span>↔️ {lang === 'km' ? 'កូអរដោនេឆ្វេងស្តាំ (Offset X)' : 'Manual Offset X'}</span>
+                      <span className="font-mono text-orange-500 font-bold font-mono">
+                        {activeDraggableLayer === 'logo' ? logoOffsetX :
+                         activeDraggableLayer === 'header' ? headerOffsetX :
+                         activeDraggableLayer === 'main-title' ? mainTitleOffsetX :
+                         activeDraggableLayer === 'sub-title' ? subTitleOffsetX :
+                         activeDraggableLayer === 'winners' ? winnersOffsetX :
+                         congratsOffsetX}px
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min="-400"
+                      max="400"
+                      step="1"
+                      value={
+                        activeDraggableLayer === 'logo' ? logoOffsetX :
+                        activeDraggableLayer === 'header' ? headerOffsetX :
+                        activeDraggableLayer === 'main-title' ? mainTitleOffsetX :
+                        activeDraggableLayer === 'sub-title' ? subTitleOffsetX :
+                        activeDraggableLayer === 'winners' ? winnersOffsetX :
+                        congratsOffsetX
+                      }
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value);
+                        if (activeDraggableLayer === 'logo') setLogoOffsetX(val);
+                        else if (activeDraggableLayer === 'header') setHeaderOffsetX(val);
+                        else if (activeDraggableLayer === 'main-title') setMainTitleOffsetX(val);
+                        else if (activeDraggableLayer === 'sub-title') setSubTitleOffsetX(val);
+                        else if (activeDraggableLayer === 'winners') setWinnersOffsetX(val);
+                        else if (activeDraggableLayer === 'congrats') setCongratsOffsetX(val);
+                      }}
+                      className="w-full accent-orange-500 cursor-ew-resize h-1 bg-white/10 rounded-lg appearance-none"
+                    />
+                  </div>
+
+                  {/* Slider Y */}
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-[11px] text-slate-400 font-sans">
+                      <span>↕️ {lang === 'km' ? 'កូអរដោនេលើក្រោម (Offset Y)' : 'Manual Offset Y'}</span>
+                      <span className="font-mono text-orange-500 font-bold font-mono">
+                        {activeDraggableLayer === 'logo' ? logoOffsetY :
+                         activeDraggableLayer === 'header' ? headerOffsetY :
+                         activeDraggableLayer === 'main-title' ? mainTitleOffsetY :
+                         activeDraggableLayer === 'sub-title' ? subTitleOffsetY :
+                         activeDraggableLayer === 'winners' ? winnersOffsetY :
+                         congratsOffsetY}px
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min="-450"
+                      max="450"
+                      step="1"
+                      value={
+                        activeDraggableLayer === 'logo' ? logoOffsetY :
+                        activeDraggableLayer === 'header' ? headerOffsetY :
+                        activeDraggableLayer === 'main-title' ? mainTitleOffsetY :
+                        activeDraggableLayer === 'sub-title' ? subTitleOffsetY :
+                        activeDraggableLayer === 'winners' ? winnersOffsetY :
+                        congratsOffsetY
+                      }
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value);
+                        if (activeDraggableLayer === 'logo') setLogoOffsetY(val);
+                        else if (activeDraggableLayer === 'header') setHeaderOffsetY(val);
+                        else if (activeDraggableLayer === 'main-title') setMainTitleOffsetY(val);
+                        else if (activeDraggableLayer === 'sub-title') setSubTitleOffsetY(val);
+                        else if (activeDraggableLayer === 'winners') setWinnersOffsetY(val);
+                        else if (activeDraggableLayer === 'congrats') setCongratsOffsetY(val);
+                      }}
+                      className="w-full accent-orange-500 cursor-ew-resize h-1 bg-white/10 rounded-lg appearance-none"
+                    />
+                  </div>
+
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          {/* ADVANCED TYPOGRAPHY, COLOR MIXERS & TEXT ZOOM PANEL */}
+          <div className="bg-[#161618] border border-white/5 p-5 rounded-2xl space-y-4 shadow-xl" id="poster-text-editors-panel">
+            <div className="flex items-center gap-2 border-b border-white/5 pb-3">
+              <Type className="w-4 h-4 text-orange-500 animate-pulse" />
+              <h3 className="text-white text-sm font-sans font-semibold">
+                {lang === 'km' ? 'កែសម្រួលអក្សរ និងពង្រីក-បង្រួម (Text Editor & Mix Colors)' : 'Poster Text Editor, Zoom & Color Mixers'}
+              </h3>
+            </div>
+
+            {/* 1. Header Title Text Row */}
+            <div className="space-y-2 bg-[#111112] p-3.5 rounded-xl border border-white/5">
+              <div className="flex flex-col sm:flex-row justify-between gap-1 sm:items-center">
+                <span className="text-xs font-sans text-slate-300 font-bold">1. {lang === 'km' ? 'អក្សរលើក្បាល (Secondary Header)' : 'Secondary Header'}</span>
+                <span className="text-[10px] text-orange-500 font-mono font-bold">Zoom: {Math.round(headerScale * 100)}%</span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <input
+                  type="text"
+                  value={headerText}
+                  onChange={(e) => setHeaderText(e.target.value)}
+                  className="w-full bg-[#18181A] border border-white/5 rounded-lg px-2.5 py-1.5 text-xs text-white"
+                  placeholder={lang === 'km' ? 'អបអរសាទរម្ចាស់រង្វាន់' : 'Congratulations Winners!'}
+                />
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-slate-500 font-mono shrink-0">Color</span>
+                  <input
+                    type="color"
+                    value={headerColor || '#FFFFFF'}
+                    onChange={(e) => setHeaderColor(e.target.value)}
+                    className="w-full bg-[#18181A] border border-white/5 rounded-lg h-8 cursor-pointer p-0"
+                  />
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="range"
+                  min="0.5"
+                  max="2.0"
+                  step="0.05"
+                  value={headerScale}
+                  onChange={(e) => setHeaderScale(parseFloat(e.target.value))}
+                  className="w-full accent-orange-500 cursor-ew-resize h-1 bg-white/10 rounded-lg appearance-none"
+                />
+              </div>
+            </div>
+
+            {/* 2. Main Title Text Row */}
+            <div className="space-y-2 bg-[#111112] p-3.5 rounded-xl border border-white/5">
+              <div className="flex flex-col sm:flex-row justify-between gap-1 sm:items-center">
+                <span className="text-xs font-sans text-slate-300 font-bold">2. {lang === 'km' ? 'ចំណងជើងធំ (Main Title Headline)' : 'Main Title Headline'}</span>
+                <span className="text-[10px] text-orange-500 font-mono font-bold">Zoom: {Math.round(mainTitleScale * 100)}%</span>
+              </div>
+              <input
+                type="text"
+                value={mainTitleText}
+                onChange={(e) => setMainTitleText(e.target.value)}
+                className="w-full bg-[#18181A] border border-white/5 rounded-lg px-2.5 py-1.5 text-xs text-white mb-1"
+                placeholder="GIVEAWAY"
+              />
+              
+              {/* Color Gradient Mixer controls */}
+              <div className="space-y-2 pt-1 border-t border-white/5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] text-slate-400 font-sans">{lang === 'km' ? 'លាយពណ៌ផ្ទៃអក្សរ (Mix Gradient colors)៖' : 'Mix Gradient colors:'}</span>
+                  <label className="flex items-center gap-1.5 cursor-pointer text-[10px] text-slate-400">
+                    <input
+                      type="checkbox"
+                      checked={isMainTitleGradient}
+                      onChange={(e) => setIsMainTitleGradient(e.target.checked)}
+                      className="accent-orange-500 rounded"
+                    />
+                    <span>Gradient Mixer</span>
+                  </label>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <span className="text-[9px] text-slate-500 font-sans uppercase block">Color 1</span>
+                    <input
+                      type="color"
+                      value={mainTitleColor1}
+                      onChange={(e) => setMainTitleColor1(e.target.value)}
+                      className="w-full bg-[#18181A] border border-white/5 rounded-lg h-8 cursor-pointer p-0"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <span className="text-[9px] text-slate-500 font-sans uppercase block">Color 2</span>
+                    <input
+                      type="color"
+                      value={mainTitleColor2}
+                      disabled={!isMainTitleGradient}
+                      onChange={(e) => setMainTitleColor2(e.target.value)}
+                      className={`w-full bg-[#18181A] border border-white/5 rounded-lg h-8 cursor-pointer p-0 ${!isMainTitleGradient ? 'opacity-30 cursor-not-allowed' : ''}`}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 pt-1">
+                <input
+                  type="range"
+                  min="0.5"
+                  max="2.5"
+                  step="0.05"
+                  value={mainTitleScale}
+                  onChange={(e) => setMainTitleScale(parseFloat(e.target.value))}
+                  className="w-full accent-orange-500 cursor-ew-resize h-1 bg-white/10 rounded-lg appearance-none"
+                />
+              </div>
+            </div>
+
+            {/* 3. Subtitle Ribbon Text Row */}
+            <div className="space-y-2 bg-[#111112] p-3.5 rounded-xl border border-white/5">
+              <div className="flex flex-col sm:flex-row justify-between gap-1 sm:items-center">
+                <span className="text-xs font-sans text-slate-300 font-bold">3. {lang === 'km' ? 'បូរចំណងជើងរង (Ribbon Subtitle)' : 'Subtitle Ribbon'}</span>
+                <span className="text-[10px] text-orange-500 font-mono font-bold">Zoom: {Math.round(subTitleScale * 100)}%</span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <input
+                  type="text"
+                  value={subTitleText}
+                  onChange={(e) => setSubTitleText(e.target.value)}
+                  className="w-full bg-[#18181A] border border-white/5 rounded-lg px-2.5 py-1.5 text-xs text-white"
+                  placeholder="🏆 WINNERS 🏆"
+                />
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-slate-500 font-mono shrink-0">Color</span>
+                  <input
+                    type="color"
+                    value={subTitleColor || '#F97316'}
+                    onChange={(e) => setSubTitleColor(e.target.value)}
+                    className="w-full bg-[#18181A] border border-white/5 rounded-lg h-8 cursor-pointer p-0"
+                  />
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="range"
+                  min="0.5"
+                  max="2.0"
+                  step="0.05"
+                  value={subTitleScale}
+                  onChange={(e) => setSubTitleScale(parseFloat(e.target.value))}
+                  className="w-full accent-orange-500 cursor-ew-resize h-1 bg-white/10 rounded-lg appearance-none"
+                />
+              </div>
+            </div>
+
+            {/* 4. Congratulations Bottom Message Row */}
+            <div className="space-y-2 bg-[#111112] p-3.5 rounded-xl border border-white/5">
+              <div className="flex flex-col sm:flex-row justify-between gap-1 sm:items-center">
+                <span className="text-xs font-sans text-slate-300 font-bold">4. {lang === 'km' ? 'សារអបអរសាទរខាងក្រោម (Bottom Message)' : 'Bottom Message'}</span>
+                <span className="text-[10px] text-orange-500 font-mono font-bold">Zoom: {Math.round(congratsScale * 100)}%</span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <textarea
+                  value={congratsText}
+                  onChange={(e) => setCongratsText(e.target.value)}
+                  className="w-full bg-[#18181A] border border-white/5 rounded-lg px-2.5 py-1.5 text-xs text-white min-h-[46px] resize-none"
+                  placeholder="អបអរសាទរអ្នកឈ្នះទាំងអស់គ្នា!..."
+                />
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-slate-500 font-mono shrink-0">Color</span>
+                  <input
+                    type="color"
+                    value={congratsColor || '#FFFFFF'}
+                    onChange={(e) => setCongratsColor(e.target.value)}
+                    className="w-full bg-[#18181A] border border-white/5 rounded-lg h-10 cursor-pointer p-0"
+                  />
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="range"
+                  min="0.5"
+                  max="2.0"
+                  step="0.05"
+                  value={congratsScale}
+                  onChange={(e) => setCongratsScale(parseFloat(e.target.value))}
+                  className="w-full accent-orange-500 cursor-ew-resize h-1 bg-white/10 rounded-lg appearance-none"
+                />
+              </div>
+            </div>
+
+            {/* 4.5. Prizes Style Customization Row */}
+            <div className="space-y-4 bg-[#111112] p-3.5 rounded-xl border border-white/5" id="prizes-style-panel">
+              <div className="flex items-center gap-1.5 border-b border-white/5 pb-2">
+                <Gift className="w-3.5 h-3.5 text-orange-500" />
+                <span className="text-xs font-sans text-slate-300 font-bold">
+                  {lang === 'km' ? 'កែសម្រួលពណ៌ និងទំហំរង្វាន់ (Prizes Style Customizer)' : 'Prizes Style & Zoom Controls'}
+                </span>
+              </div>
+
+              {/* Prize 1 Customization */}
+              <div className="space-y-2 pb-2.5 border-b border-white/5">
+                <div className="flex flex-col sm:flex-row justify-between gap-1 sm:items-center">
+                  <span className="text-[11px] font-sans text-slate-300 flex items-center gap-1.5 font-bold">
+                    <span>🥇</span>
+                    <span>{lang === 'km' ? 'រង្វាន់ទី ១' : 'Prize 1'} ({prizes[1]?.title || '...'})</span>
+                  </span>
+                  <span className="text-[10px] text-orange-500 font-mono font-bold">Zoom: {Math.round(prize1Scale * 100)}%</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] text-slate-500 font-mono shrink-0">Color</span>
+                    <input
+                      type="color"
+                      value={prize1Color || '#94A3B8'}
+                      onChange={(e) => setPrize1Color(e.target.value)}
+                      className="w-[#60px] bg-[#18181A] border border-white/5 rounded h-8 cursor-pointer p-0"
+                    />
+                    <button
+                      onClick={() => setPrize1Color('')}
+                      className="text-[10px] bg-white/5 hover:bg-white/10 px-2 py-1 rounded transition text-slate-400 cursor-pointer"
+                    >Reset</button>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="range"
+                      min="0.5"
+                      max="2.5"
+                      step="0.05"
+                      value={prize1Scale}
+                      onChange={(e) => setPrize1Scale(parseFloat(e.target.value))}
+                      className="w-full accent-orange-500 cursor-ew-resize h-1 bg-white/10 rounded-lg appearance-none"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Prize 2 Customization */}
+              <div className="space-y-2 pb-2.5 border-b border-white/5">
+                <div className="flex flex-col sm:flex-row justify-between gap-1 sm:items-center">
+                  <span className="text-[11px] font-sans text-slate-300 flex items-center gap-1.5 font-bold">
+                    <span>🥈</span>
+                    <span>{lang === 'km' ? 'រង្វាន់ទី ២' : 'Prize 2'} ({prizes[2]?.title || '...'})</span>
+                  </span>
+                  <span className="text-[10px] text-orange-500 font-mono font-bold">Zoom: {Math.round(prize2Scale * 100)}%</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] text-slate-500 font-mono shrink-0">Color</span>
+                    <input
+                      type="color"
+                      value={prize2Color || '#94A3B8'}
+                      onChange={(e) => setPrize2Color(e.target.value)}
+                      className="w-[#60px] bg-[#18181A] border border-white/5 rounded h-8 cursor-pointer p-0"
+                    />
+                    <button
+                      onClick={() => setPrize2Color('')}
+                      className="text-[10px] bg-white/5 hover:bg-white/10 px-2 py-1 rounded transition text-slate-400 cursor-pointer"
+                    >Reset</button>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="range"
+                      min="0.5"
+                      max="2.5"
+                      step="0.05"
+                      value={prize2Scale}
+                      onChange={(e) => setPrize2Scale(parseFloat(e.target.value))}
+                      className="w-full accent-orange-500 cursor-ew-resize h-1 bg-white/10 rounded-lg appearance-none"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Prize 3 Customization */}
+              <div className="space-y-2">
+                <div className="flex flex-col sm:flex-row justify-between gap-1 sm:items-center">
+                  <span className="text-[11px] font-sans text-slate-300 flex items-center gap-1.5 font-bold">
+                    <span>🥉</span>
+                    <span>{lang === 'km' ? 'រង្វាន់ទី ៣' : 'Prize 3'} ({prizes[3]?.title || '...'})</span>
+                  </span>
+                  <span className="text-[10px] text-orange-500 font-mono font-bold">Zoom: {Math.round(prize3Scale * 100)}%</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] text-slate-500 font-mono shrink-0">Color</span>
+                    <input
+                      type="color"
+                      value={prize3Color || '#94A3B8'}
+                      onChange={(e) => setPrize3Color(e.target.value)}
+                      className="w-[#60px] bg-[#18181A] border border-white/5 rounded h-8 cursor-pointer p-0"
+                    />
+                    <button
+                      onClick={() => setPrize3Color('')}
+                      className="text-[10px] bg-white/5 hover:bg-white/10 px-2 py-1 rounded transition text-slate-400 cursor-pointer"
+                    >Reset</button>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="range"
+                      min="0.5"
+                      max="2.5"
+                      step="0.05"
+                      value={prize3Scale}
+                      onChange={(e) => setPrize3Scale(parseFloat(e.target.value))}
+                      className="w-full accent-orange-500 cursor-ew-resize h-1 bg-white/10 rounded-lg appearance-none"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 5. ADD CUSTOM LABELS / TEXT LAYERS */}
+            <div className="space-y-4 bg-[#111112] p-3.5 rounded-xl border border-white/5">
+              <div className="flex items-center justify-between border-b border-white/5 pb-2">
+                <span className="text-xs font-sans text-slate-300 font-bold flex items-center gap-1">
+                  <Plus className="w-3.5 h-3.5 text-orange-500" />
+                  <span>{lang === 'km' ? 'ថែមសំណេរអក្សរសេរដោយខ្លួនឯង (Add Custom Text)' : 'Add Custom Label Layer'}</span>
+                </span>
+                
+                <button
+                  onClick={() => {
+                    setExtraTexts(prev => [
+                      ...prev,
+                      {
+                        id: Date.now(),
+                        text: lang === 'km' ? 'សំណេរថ្មី' : 'New Label',
+                        size: 20,
+                        color: '#FFFFFF',
+                        x: 50, // horizontal percentage (0-100)
+                        y: 80, // vertical percentage (0-100)
+                        bold: false,
+                        shadow: true
+                      }
+                    ]);
+                  }}
+                  className="px-2.5 py-1 rounded bg-orange-600 hover:bg-orange-500 text-white text-[10px] font-sans font-bold flex items-center gap-1 cursor-pointer"
+                >
+                  <Plus className="w-3 h-3" />
+                  <span>{lang === 'km' ? 'បន្ថែម' : 'Add'}</span>
+                </button>
+              </div>
+
+              {extraTexts.length === 0 ? (
+                <p className="text-[10px] text-slate-500 italic text-center py-2">
+                  {lang === 'km' ? 'គ្មានអក្សរបន្ថែម។ ចុច « បន្ថែម » ដើម្បីសរសេរទិន្នន័យថ្មីដោយសេរី។' : 'No extra text layers yet. Click « Add » to write custom content.'}
+                </p>
+              ) : (
+                <div className="space-y-3.5 max-h-[220px] overflow-y-auto pr-1">
+                  {extraTexts.map((layer) => (
+                    <div key={layer.id} className="bg-[#18181A] p-2.5 rounded-lg border border-white/5 space-y-2 relative group/extra">
+                      <button
+                        onClick={() => setExtraTexts(prev => prev.filter(l => l.id !== layer.id))}
+                        className="absolute top-2 right-2 p-1 bg-red-950/20 text-rose-500 border border-rose-950/35 rounded hover:bg-rose-950/40 transition cursor-pointer"
+                        title={lang === 'km' ? 'លុបជួរនេះ' : 'Delete'}
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+
+                      <div className="grid grid-cols-2 gap-2">
+                        <input
+                          type="text"
+                          value={layer.text}
+                          onChange={(e) => {
+                            const newText = e.target.value;
+                            setExtraTexts(prev => prev.map(l => l.id === layer.id ? { ...l, text: newText } : l));
+                          }}
+                          className="w-full bg-[#111112] border border-white/5 rounded px-2 py-1 text-xs text-white"
+                          placeholder="Text text..."
+                        />
+                        <input
+                          type="color"
+                          value={layer.color}
+                          onChange={(e) => {
+                            const newCol = e.target.value;
+                            setExtraTexts(prev => prev.map(l => l.id === layer.id ? { ...l, color: newCol } : l));
+                          }}
+                          className="w-full bg-[#111112] border border-white/5 rounded cursor-pointer h-7 p-0"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2 text-[10px]">
+                        <div>
+                          <div className="flex justify-between text-slate-500 mb-0.5">
+                            <span>↕️ {lang === 'km' ? 'ទីតាំងលើក្រោម (Y)' : 'Y Pos'}</span>
+                            <span className="font-mono text-slate-300">{layer.y}%</span>
+                          </div>
+                          <input
+                            type="range"
+                            min="0"
+                            max="100"
+                            value={layer.y}
+                            onChange={(e) => {
+                              const val = parseInt(e.target.value);
+                              setExtraTexts(prev => prev.map(l => l.id === layer.id ? { ...l, y: val } : l));
+                            }}
+                            className="w-full accent-orange-500 h-1 bg-white/5 rounded appearance-none cursor-pointer"
+                          />
+                        </div>
+                        <div>
+                          <div className="flex justify-between text-slate-500 mb-0.5">
+                            <span>↔️ {lang === 'km' ? 'ឆ្វេងស្ដាំ (X)' : 'X Pos'}</span>
+                            <span className="font-mono text-slate-300">{layer.x}%</span>
+                          </div>
+                          <input
+                            type="range"
+                            min="0"
+                            max="100"
+                            value={layer.x}
+                            onChange={(e) => {
+                              const val = parseInt(e.target.value);
+                              setExtraTexts(prev => prev.map(l => l.id === layer.id ? { ...l, x: val } : l));
+                            }}
+                            className="w-full accent-orange-500 h-1 bg-white/5 rounded appearance-none cursor-pointer"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2 pt-1 border-t border-white/5 text-[9.5px]/none items-center">
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-500">Size: <span className="font-mono font-bold text-slate-300">{layer.size}px</span></span>
+                          <div className="flex gap-1 shrink-0 ml-1">
+                            <button
+                              onClick={() => {
+                                setExtraTexts(prev => prev.map(l => l.id === layer.id ? { ...l, size: Math.max(10, l.size - 2) } : l));
+                              }}
+                              className="w-4 h-4 bg-white/5 rounded text-white flex items-center justify-center text-xs"
+                            >-</button>
+                            <button
+                              onClick={() => {
+                                setExtraTexts(prev => prev.map(l => l.id === layer.id ? { ...l, size: Math.min(100, l.size + 2) } : l));
+                              }}
+                              className="w-4 h-4 bg-white/5 rounded text-white flex items-center justify-center text-xs"
+                            >+</button>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-end gap-3 shrink-0">
+                          <label className="flex items-center gap-1 cursor-pointer text-slate-400">
+                            <input
+                              type="checkbox"
+                              checked={layer.bold}
+                              onChange={(e) => {
+                                const checked = e.target.checked;
+                                setExtraTexts(prev => prev.map(l => l.id === layer.id ? { ...l, bold: checked } : l));
+                              }}
+                              className="accent-orange-500 rounded"
+                            />
+                            <span>Bold</span>
+                          </label>
+                          <label className="flex items-center gap-1 cursor-pointer text-slate-400">
+                            <input
+                              type="checkbox"
+                              checked={layer.shadow}
+                              onChange={(e) => {
+                                const checked = e.target.checked;
+                                setExtraTexts(prev => prev.map(l => l.id === layer.id ? { ...l, shadow: checked } : l));
+                              }}
+                              className="accent-orange-500 rounded"
+                            />
+                            <span>Shadow</span>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
 
           <div className="bg-[#161618] border border-white/5 p-5 rounded-2xl space-y-4 shadow-xl">
             <div>
